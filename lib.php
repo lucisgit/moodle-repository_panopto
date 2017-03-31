@@ -46,7 +46,51 @@ class repository_panopto extends repository {
      * @return array list of files including meta information as specified by parent.
      */
     public function get_listing($path = '', $page = '') {
-        return array('list' => array());
+        global $USER, $OUTPUT;
+
+        // Data preparation.
+        if (empty($path)) {
+            $path = '00000000-0000-0000-0000-000000000000';
+        }
+        $patharray = explode('/', $path);
+        $currentfolderid = end($patharray);
+        $list = array();
+        $navpath = array(array('name' => get_string('pluginname', 'repository_panopto'), 'path' => '00000000-0000-0000-0000-000000000000'));
+
+        // Instantiate Panopto client.
+        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
+        $panoptoclient->setAuthenticationInfo(
+                get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
+        $auth = $panoptoclient->getAuthenticationInfo();
+        $smclient = $panoptoclient->SessionManagement();
+
+        // No pagination effectively.
+        $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
+        $pagination->setPageNumber(0);
+        $pagination->setMaxNumberResults(1000);
+
+        // Build the GetFoldersList request and perform the call.
+        $request = new \Panopto\SessionManagement\ListFoldersRequest();
+        $request->setPagination($pagination);
+        $request->setParentFolderId($currentfolderid);
+
+        $param = new \Panopto\SessionManagement\GetFoldersList($auth, $request, '');
+        $folders = $smclient->GetFoldersList($param)->getGetFoldersListResult();
+        $totalfolders = $folders->getTotalNumberResults();
+
+        // Processing GetFoldersList result.
+        if ($totalfolders) {
+            foreach ($folders->getResults() as $folder) {
+                $list[] = array(
+                    'title' => $folder->getName(),
+                    'path' => $path . '/' . $folder->getId(),
+                    'thumbnail' => $OUTPUT->pix_url('f/folder-32')->out(false),
+                    'children' => array(),
+                );
+            }
+        }
+
+        return array('dynload' => true, 'nologin' => true, 'path' => $navpath, 'list' => $list);
     }
 
     /**
