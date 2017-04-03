@@ -71,14 +71,11 @@ class repository_panopto extends repository {
      * @return array list of files including meta information as specified by parent.
      */
     public function get_listing($path = '', $page = '') {
-        global $OUTPUT;
-
         // Data preparation.
         if (empty($path)) {
             $path = '00000000-0000-0000-0000-000000000000';
         }
         $navpath = array();
-        $list = array();
 
         // Split the path requested.
         $patharray = explode('/', $path);
@@ -101,6 +98,25 @@ class repository_panopto extends repository {
 
             }
         }
+
+        // Get the folders list for the current path.
+        $list = $this->get_folders_list($path);
+        return array('dynload' => true, 'nologin' => true, 'path' => $navpath, 'list' => $list);
+    }
+
+    /**
+     * Given a path, get a list of Panopto directories.
+     *
+     * @param string $path identifier for current path.
+     * @param string $search the search query.
+     * @return array list of folders with the same layout as the 'list' element in 'get_listing'.
+     */
+    private function get_folders_list($path, $search = '') {
+        global $OUTPUT;
+        $list = array();
+
+        // Split the path requested.
+        $patharray = explode('/', $path);
         // Determine the curent directory to show.
         $currentfolderid = end($patharray);
 
@@ -115,7 +131,7 @@ class repository_panopto extends repository {
         $request->setSortIncreasing(true);
         $request->setParentFolderId($currentfolderid);
 
-        $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, '');
+        $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, $search);
         $folders = $this->smclient->GetFoldersList($param)->getGetFoldersListResult();
         $totalfolders = $folders->getTotalNumberResults();
 
@@ -130,8 +146,7 @@ class repository_panopto extends repository {
                 );
             }
         }
-
-        return array('dynload' => true, 'nologin' => true, 'path' => $navpath, 'list' => $list);
+        return $list;
     }
 
     /**
