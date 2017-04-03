@@ -38,6 +38,31 @@ require_once($CFG->dirroot . '/repository/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_panopto extends repository {
+    /** @var stdClass Session Management client */
+    private $smclient;
+
+    /** @var stdClass AuthenticationInfo object */
+    private $auth;
+
+    /**
+     * Constructor
+     *
+     * @param int $repositoryid repository instance id.
+     * @param int|stdClass $context a context id or context object.
+     * @param array $options repository options.
+     */
+    public function __construct($repositoryid, $context = SYSCONTEXTID, $options = array()) {
+        global $USER;
+        parent::__construct($repositoryid, $context, $options);
+
+        // Instantiate Panopto client.
+        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
+        $panoptoclient->setAuthenticationInfo(
+                get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
+        $this->auth = $panoptoclient->getAuthenticationInfo();
+        $this->smclient = $panoptoclient->SessionManagement();
+    }
+
     /**
      * Given a path, and perhaps a search, get a list of files.
      *
@@ -46,14 +71,7 @@ class repository_panopto extends repository {
      * @return array list of files including meta information as specified by parent.
      */
     public function get_listing($path = '', $page = '') {
-        global $USER, $OUTPUT;
-
-        // Instantiate Panopto client.
-        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
-        $panoptoclient->setAuthenticationInfo(
-                get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
-        $auth = $panoptoclient->getAuthenticationInfo();
-        $smclient = $panoptoclient->SessionManagement();
+        global $OUTPUT;
 
         // Data preparation.
         if (empty($path)) {
@@ -75,8 +93,8 @@ class repository_panopto extends repository {
             } else {
                 // Getting deeper in subdirs...
                 // Determine folder name first.
-                $param = new \Panopto\SessionManagement\GetFoldersById($auth, array($pathitem));
-                $folders = $smclient->GetFoldersById($param)->getGetFoldersByIdResult();
+                $param = new \Panopto\SessionManagement\GetFoldersById($this->auth, array($pathitem));
+                $folders = $this->smclient->GetFoldersById($param)->getGetFoldersByIdResult();
                 // Add navigation path item.
                 $navpathitem = $navpathitem . '/' . $pathitem;
                 $navpath[] = array('name' => $folders[0]->getName(), 'path' => $navpathitem);
@@ -97,8 +115,8 @@ class repository_panopto extends repository {
         $request->setSortIncreasing(true);
         $request->setParentFolderId($currentfolderid);
 
-        $param = new \Panopto\SessionManagement\GetFoldersList($auth, $request, '');
-        $folders = $smclient->GetFoldersList($param)->getGetFoldersListResult();
+        $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, '');
+        $folders = $this->smclient->GetFoldersList($param)->getGetFoldersListResult();
         $totalfolders = $folders->getTotalNumberResults();
 
         // Processing GetFoldersList result.
