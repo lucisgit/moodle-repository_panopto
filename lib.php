@@ -93,6 +93,8 @@ class repository_panopto extends repository {
 
         $request = new \Panopto\SessionManagement\ListFoldersRequest();
         $request->setPagination($pagination);
+        $request->setSortBy('Name');
+        $request->setSortIncreasing(true);
         $request->setParentFolderId($currentfolderid);
 
         $param = new \Panopto\SessionManagement\GetFoldersList($auth, $request, '');
