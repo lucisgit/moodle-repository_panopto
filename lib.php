@@ -48,15 +48,6 @@ class repository_panopto extends repository {
     public function get_listing($path = '', $page = '') {
         global $USER, $OUTPUT;
 
-        // Data preparation.
-        if (empty($path)) {
-            $path = '00000000-0000-0000-0000-000000000000';
-        }
-        $patharray = explode('/', $path);
-        $currentfolderid = end($patharray);
-        $list = array();
-        $navpath = array(array('name' => get_string('pluginname', 'repository_panopto'), 'path' => '00000000-0000-0000-0000-000000000000'));
-
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
         $panoptoclient->setAuthenticationInfo(
@@ -64,12 +55,42 @@ class repository_panopto extends repository {
         $auth = $panoptoclient->getAuthenticationInfo();
         $smclient = $panoptoclient->SessionManagement();
 
-        // No pagination effectively.
+        // Data preparation.
+        if (empty($path)) {
+            $path = '00000000-0000-0000-0000-000000000000';
+        }
+        $navpath = array();
+        $list = array();
+
+        // Split the path requested.
+        $patharray = explode('/', $path);
+        // Build navigation path.
+        // TODO: Change the code to build path recursevly.
+        $navpathitem = '';
+        foreach ($patharray as $pathitem) {
+            if ($pathitem === '00000000-0000-0000-0000-000000000000') {
+                // Root dir.
+                $navpathitem = $pathitem;
+                $navpath[] = array('name' => get_string('pluginname', 'repository_panopto'), 'path' => $navpathitem);
+            } else {
+                // Getting deeper in subdirs...
+                // Determine folder name first.
+                $param = new \Panopto\SessionManagement\GetFoldersById($auth, array($pathitem));
+                $folders = $smclient->GetFoldersById($param)->getGetFoldersByIdResult();
+                // Add navigation path item.
+                $navpathitem = $navpathitem . '/' . $pathitem;
+                $navpath[] = array('name' => $folders[0]->getName(), 'path' => $navpathitem);
+
+            }
+        }
+        // Determine the curent directory to show.
+        $currentfolderid = end($patharray);
+
+        // Build the GetFoldersList request and perform the call.
         $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
         $pagination->setPageNumber(0);
         $pagination->setMaxNumberResults(1000);
 
-        // Build the GetFoldersList request and perform the call.
         $request = new \Panopto\SessionManagement\ListFoldersRequest();
         $request->setPagination($pagination);
         $request->setParentFolderId($currentfolderid);
