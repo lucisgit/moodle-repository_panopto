@@ -38,6 +38,9 @@ require_once($CFG->dirroot . '/repository/lib.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class repository_panopto extends repository {
+    /** Current client version in use. */
+    const ROOT_FOLDER_ID = '00000000-0000-0000-0000-000000000000';
+
     /** @var stdClass Session Management client */
     private $smclient;
 
@@ -73,7 +76,7 @@ class repository_panopto extends repository {
     public function get_listing($path = '', $page = '') {
         // Data preparation.
         if (empty($path)) {
-            $path = '00000000-0000-0000-0000-000000000000';
+            $path = self::ROOT_FOLDER_ID;
         }
         $navpath = array();
 
@@ -83,7 +86,7 @@ class repository_panopto extends repository {
         // TODO: Change the code to build path recursevly.
         $navpathitem = '';
         foreach ($patharray as $pathitem) {
-            if ($pathitem === '00000000-0000-0000-0000-000000000000') {
+            if ($pathitem === self::ROOT_FOLDER_ID) {
                 // Root dir.
                 $navpathitem = $pathitem;
                 $navpath[] = array('name' => get_string('pluginname', 'repository_panopto'), 'path' => $navpathitem);
@@ -101,7 +104,30 @@ class repository_panopto extends repository {
 
         // Get the folders list for the current path.
         $list = $this->get_folders_list($path);
-        return array('dynload' => true, 'nologin' => true, 'path' => $navpath, 'list' => $list);
+
+        // Output result.
+        $listing = $this->get_base_listing();
+        $listing['list'] = $list;
+        $listing['path'] = $navpath;
+        return $listing;
+    }
+
+    /**
+     * Search for results
+     * @param   string  $key    The search string
+     * @param   int     $page   The search page
+     * @return  array   A set of results with the same layout as the 'list' element in 'get_listing'.
+     */
+    public function search($key, $page = 0) {
+
+        // Get the folders list for the search.
+        $list = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
+
+        // Output result.
+        $listing = $this->get_base_listing();
+        $listing['issearchresult'] = true;
+        $listing['list'] = $list;
+        return $listing;
     }
 
     /**
@@ -115,11 +141,6 @@ class repository_panopto extends repository {
         global $OUTPUT;
         $list = array();
 
-        // Split the path requested.
-        $patharray = explode('/', $path);
-        // Determine the curent directory to show.
-        $currentfolderid = end($patharray);
-
         // Build the GetFoldersList request and perform the call.
         $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
         $pagination->setPageNumber(0);
@@ -129,7 +150,18 @@ class repository_panopto extends repository {
         $request->setPagination($pagination);
         $request->setSortBy('Name');
         $request->setSortIncreasing(true);
-        $request->setParentFolderId($currentfolderid);
+
+        // If we are searching, there is no need to set parent folder,
+        // also a good idea to search by relevance.
+        if (!empty($search)) {
+            $request->setWildcardSearchNameOnly(true);
+        } else {
+            // Split the path requested.
+            $patharray = explode('/', $path);
+            // Determine the curent directory to show.
+            $currentfolderid = end($patharray);
+            $request->setParentFolderId($currentfolderid);
+        }
 
         $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, $search);
         $folders = $this->smclient->GetFoldersList($param)->getGetFoldersListResult();
@@ -147,6 +179,20 @@ class repository_panopto extends repository {
             }
         }
         return $list;
+    }
+
+    /**
+     * Return array of default listing properties.
+     *
+     * @return array of listing properties.
+     */
+    private function get_base_listing() {
+        return array(
+            'dynload' => true,
+            'nologin' => true,
+            'path' => array(array('name' => get_string('pluginname', 'repository_panopto'), 'path' => self::ROOT_FOLDER_ID)),
+            'list' => array(),
+        );
     }
 
     /**
