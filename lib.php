@@ -223,9 +223,13 @@ class repository_panopto extends repository {
         // Processing GetFoldersList result.
         if ($totalsessions) {
             foreach ($sessions->getResults() as $session) {
+                $url = new moodle_url($session->getViewerUrl());
+                $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
                 $list[] = array(
                     'title' => $session->getName(),
                     'source' => $session->getId(),
+                    'url' => $url->out(false),
+                    'thumbnail' => $thumburl->out(false),
                 );
             }
         }
