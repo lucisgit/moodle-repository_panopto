@@ -102,8 +102,10 @@ class repository_panopto extends repository {
             }
         }
 
-        // Get the folders list for the current path.
-        $list = $this->get_folders_list($path);
+        // Get the folders and sessions list for the current path.
+        $listfolders = $this->get_folders_list($path);
+        $listfiles = $this->get_sessions_list($path);
+        $list = array_merge($listfolders, $listfiles);
 
         // Output result.
         $listing = $this->get_base_listing();
@@ -120,8 +122,10 @@ class repository_panopto extends repository {
      */
     public function search($key, $page = 0) {
 
-        // Get the folders list for the search.
-        $list = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
+        // Get the folders and sessions list for the current path.
+        $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
+        $listfiles = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
+        $list = array_merge($listfolders, $listfiles);
 
         // Output result.
         $listing = $this->get_base_listing();
@@ -175,6 +179,53 @@ class repository_panopto extends repository {
                     'path' => $path . '/' . $folder->getId(),
                     'thumbnail' => $OUTPUT->pix_url('f/folder-32')->out(false),
                     'children' => array(),
+                );
+            }
+        }
+        return $list;
+    }
+
+    /**
+     * Given a path, get a list of Panopto sessions available for viewing.
+     *
+     * @param string $path identifier for current path.
+     * @param string $search the search query.
+     * @return array list of files with the same layout as the 'list' element in 'get_listing'.
+     */
+    private function get_sessions_list($path, $search = '') {
+        global $OUTPUT;
+        $list = array();
+
+        // Build the GetFoldersList request and perform the call.
+        $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
+        $pagination->setPageNumber(0);
+        $pagination->setMaxNumberResults(1000);
+
+        $request = new \Panopto\SessionManagement\ListSessionsRequest();
+        $request->setPagination($pagination);
+        $request->setSortBy('Name');
+        $request->setSortIncreasing(true);
+        $request->setStates(array('Complete'));
+
+        // If we are not searching, set parent folder.
+        if (empty($search)) {
+            // Split the path requested.
+            $patharray = explode('/', $path);
+            // Determine the curent directory to show.
+            $currentfolderid = end($patharray);
+            $request->setFolderId($currentfolderid);
+        }
+
+        $param = new \Panopto\SessionManagement\GetSessionsList($this->auth, $request, $search);
+        $sessions = $this->smclient->GetSessionsList($param)->getGetSessionsListResult();
+        $totalsessions = $sessions->getTotalNumberResults();
+
+        // Processing GetFoldersList result.
+        if ($totalsessions) {
+            foreach ($sessions->getResults() as $session) {
+                $list[] = array(
+                    'title' => $session->getName(),
+                    'source' => $session->getId(),
                 );
             }
         }
