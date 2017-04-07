@@ -44,6 +44,9 @@ class repository_panopto extends repository {
     /** @var stdClass Session Management client */
     private $smclient;
 
+    /** @var stdClass User Management client */
+    private $umclient;
+
     /** @var stdClass AuthenticationInfo object */
     private $auth;
 
@@ -223,13 +226,17 @@ class repository_panopto extends repository {
         // Processing GetFoldersList result.
         if ($totalsessions) {
             foreach ($sessions->getResults() as $session) {
+                $title = $session->getName();
                 $url = new moodle_url($session->getViewerUrl());
                 $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
                 $list[] = array(
-                    'title' => $session->getName(),
-                    'source' => $session->getId(),
+                    'shorttitle' => $title,
+                    'title' => $title.'.mp4', // Hack to accept this file by extension.
+                    'source' => $session->getMP4Url(),
                     'url' => $url->out(false),
                     'thumbnail' => $thumburl->out(false),
+                    'thumbnail_title' => $session->getDescription(),
+                    'date' => $session->getStartTime()->format('U'),
                 );
             }
         }
@@ -310,12 +317,15 @@ class repository_panopto extends repository {
     }
 
     /**
-     * This repository supports any filetype.
+     * This repository supports only mp4.
+     *
+     * In fact Panopto sessions do not have file extensions,
+     * we make them mp4 in get_listing by default to make this repo work.
      *
      * @return string '*' means this repository support any files
      */
     public function supported_filetypes() {
-        return '*';
+        return 'video/mp4';
     }
 
     /**
