@@ -61,12 +61,16 @@ class repository_panopto extends repository {
         global $USER;
         parent::__construct($repositoryid, $context, $options);
 
+        //TODO Use $this->disabled = true; in the wrong context.
+
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
         $panoptoclient->setAuthenticationInfo(
                 get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
         $this->auth = $panoptoclient->getAuthenticationInfo();
         $this->smclient = $panoptoclient->SessionManagement();
+
+        //TODO: IUserManagement.SyncExternalUser
     }
 
     /**
