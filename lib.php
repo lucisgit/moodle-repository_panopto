@@ -61,7 +61,10 @@ class repository_panopto extends repository {
         global $USER;
         parent::__construct($repositoryid, $context, $options);
 
-        //TODO Use $this->disabled = true; in the wrong context.
+        // Disable this repo, we only can use it in Panopto course module at the moment,
+        // which will initialise it explicitly and bypass this flag. It is pointless to use it outside
+        // Panopto module, as it returns Panopto sessionid string only for the choosen video.
+        $this->disabled = true;
 
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
@@ -128,7 +131,6 @@ class repository_panopto extends repository {
      * @return  array   A set of results with the same layout as the 'list' element in 'get_listing'.
      */
     public function search($key, $page = 0) {
-
         // Get the folders and sessions list for the current path.
         $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
         $listfiles = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
@@ -235,8 +237,8 @@ class repository_panopto extends repository {
                 $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
                 $list[] = array(
                     'shorttitle' => $title,
-                    'title' => $title.'.mp4', // Hack to accept this file by extension.
-                    'source' => $session->getMP4Url(),
+                    'title' => $title,
+                    'source' => $session->getId(),
                     'url' => $url->out(false),
                     'thumbnail' => $thumburl->out(false),
                     'thumbnail_title' => $session->getDescription(),
@@ -318,18 +320,6 @@ class repository_panopto extends repository {
      */
     public function global_search() {
         return false;
-    }
-
-    /**
-     * This repository supports only mp4.
-     *
-     * In fact Panopto sessions do not have file extensions,
-     * we make them mp4 in get_listing by default to make this repo work.
-     *
-     * @return string '*' means this repository support any files
-     */
-    public function supported_filetypes() {
-        return 'video/mp4';
     }
 
     /**
