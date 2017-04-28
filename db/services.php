@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version details.
+ * Panopto repository external functions and service definitions.
  *
  * @package    repository_panopto
  * @copyright  2017 Lancaster University (http://www.lancaster.ac.uk/)
@@ -24,8 +24,15 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+$functions = array(
+        'repository_panopto_get_session_by_id' => array(
+            'classname'     => 'repository_panopto_external',
+            'methodname'    => 'get_session_by_id',
+            'classpath'     => 'repository/panopto/externallib.php',
+            'description'   => 'Get Panopto session by id using API query.',
+            'type'          => 'read',
+            'capabilities'  => 'repository/panopto:view',
+            'ajax'          => true,
+        ),
+);
 
-$plugin->version   = 2017042800;        // The current plugin version (Date: YYYYMMDDXX)
-$plugin->requires  = 2016052300;        // Requires 3.1 Moodle version
-$plugin->component = 'repository_panopto'; // Full name of the plugin (used for diagnostics)
