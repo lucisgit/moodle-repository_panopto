@@ -14,5 +14,8 @@ M.form_panoptopicker.init = function(Y, options) {
 };
 
 M.form_panoptopicker.callback = function (params) {
-    document.getElementById(M.form_panoptopicker.elements[params.client_id]).value = params.url;
+    // Set value.
+    Y.one('#' + M.form_panoptopicker.elements[params.client_id]).set('value', params.url);
+    // Trigger change so that we can trace it in amd.
+    Y.one('#' + M.form_panoptopicker.elements[params.client_id]).simulate('change');
 };

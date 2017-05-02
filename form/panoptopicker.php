@@ -18,7 +18,7 @@
 /**
  * Panopto video picker form element.
  *
- * @package    mod_panopto
+ * @package    repository_panopto
  * @copyright  2017 Lancaster University (http://www.lancaster.ac.uk/)
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -128,10 +128,16 @@ EOD;
         // Print out file picker.
         $str .= $OUTPUT->render($fp);
 
-        // Initialise JS
+        // Initialise filepicker JS.
+        // TODO: This code have to go to amd, but let's wait till filepicker
+        // will get into amd in the core first. Passing $options to amd seems
+        // problematic as it contains objects.
         $options->element_id = $this->getAttribute('id');
         $module = array('name'=>'form_panoptopicker', 'fullpath'=>'/repository/panopto/form/panoptopicker.js', 'requires'=>array('core_filepicker'));
         $PAGE->requires->js_init_call('M.form_panoptopicker.init', array($options), true, $module);
+
+        // Initialise JS amd that performs AJAX calls to retrieve session data using Panopto API on backend.
+        $PAGE->requires->js_call_amd('repository_panopto/panoptopicker', 'init', array(array('element_id' => $options->element_id)));
 
         return $str;
     }
