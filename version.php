@@ -26,6 +26,6 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2017042800;        // The current plugin version (Date: YYYYMMDDXX)
+$plugin->version   = 2017050300;        // The current plugin version (Date: YYYYMMDDXX)
 $plugin->requires  = 2016052300;        // Requires 3.1 Moodle version
 $plugin->component = 'repository_panopto'; // Full name of the plugin (used for diagnostics)

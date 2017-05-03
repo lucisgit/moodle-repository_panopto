@@ -137,7 +137,11 @@ EOD;
         $PAGE->requires->js_init_call('M.form_panoptopicker.init', array($options), true, $module);
 
         // Initialise JS amd that performs AJAX calls to retrieve session data using Panopto API on backend.
-        $PAGE->requires->js_call_amd('repository_panopto/panoptopicker', 'init', array(array('element_id' => $options->element_id)));
+        $params = array(
+            'elementid' => $options->element_id,
+            'contextid' => $PAGE->context->id,
+        );
+        $PAGE->requires->js_call_amd('repository_panopto/panoptopicker', 'init', array($params));
 
         return $str;
     }

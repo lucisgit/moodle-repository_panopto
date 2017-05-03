@@ -28,6 +28,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once("$CFG->libdir/externallib.php");
+require_once($CFG->dirroot . "/local/panopto/lib/panopto/lib/Client.php");
 
 /**
  * Panopto repository external API methods.
@@ -47,7 +48,8 @@ class repository_panopto_external extends external_api {
     public static function get_session_by_id_parameters() {
         return new external_function_parameters(
             array(
-                'sessionid' => new external_value(PARAM_TEXT, 'session id')
+                'sessionid' => new external_value(PARAM_TEXT, 'session id'),
+                'contextid' => new external_value(PARAM_INT, 'context id')
             )
         );
     }
@@ -55,20 +57,20 @@ class repository_panopto_external extends external_api {
     /**
      * Returns Panopto session object for the requested id
      * @param int $sessionid
+     * @param int $contextid
      * @return array of warnings and session data.
      */
-    public static function get_session_by_id($sessionid) {
+    public static function get_session_by_id($sessionid, $contextid) {
         global $USER;
         $params = self::validate_parameters(self::get_session_by_id_parameters(),
-                array('sessionid' => $sessionid));
-        
+                array('sessionid' => $sessionid, 'contextid' => $contextid));
+
         // Security checks.
-        $context = get_context_instance(CONTEXT_COURSE);
+        $context = self::get_context_from_params($params);
         self::validate_context($context);
         require_capability('repository/panopto:view', $context);
 
         $sessiondata = array();
-        $warnings = array();
 
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
@@ -79,27 +81,20 @@ class repository_panopto_external extends external_api {
 
         // Perform the call to Panopto API.
         try {
-            $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($sessionid));
+            $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($params['sessionid']));
             $sessions = $smclient->GetSessionsById($param)->getGetSessionsByIdResult()->getSession();
         } catch (Exception $e) {
-            var_dump($e);
-            $warning = array();
-            $warning['item'] = 'session';
-            $warning['itemid'] = $sessionid;
-            $warning['warningcode'] = '3';
-            $warning['message'] = 'qqq';
-            $warnings[] = $warning;
+            throw new invalid_parameter_exception('SOAP call error: ' . $e->getMessage());
         }
         if (count($sessions)) {
             $sessiondata['id'] = $sessions[0]->getId();
             $sessiondata['name'] = $sessions[0]->getName();
-            $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
+            $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $sessions[0]->getThumbUrl());
             $sessiondata['thumburl'] = $thumburl->out(false);
         }
 
         $result = array();
         $result['session'] = $sessiondata;
-        $result['warnings'] = $warnings;
         return $result;
     }
 
@@ -109,7 +104,7 @@ class repository_panopto_external extends external_api {
      * @return external_single_structure Panopto session single structure.
      * @since  Moodle 3.1
      */
-    private static function get_session_by_id_structure($required = VALUE_REQUIRED) {
+    public static function get_session_by_id_returns() {
         return new external_single_structure(
             array(
                 'session' => new external_single_structure(
@@ -117,8 +112,7 @@ class repository_panopto_external extends external_api {
                         'id'                => new external_value(PARAM_TEXT, 'session id'),
                         'name'              => new external_value(PARAM_TEXT, 'session name'),
                         'thumburl'          => new external_value(PARAM_URL, 'session thumb url'),
-                    ), 'session data', $required),
-                'warnings' => new external_warnings(),
+                    ), 'session data', VALUE_OPTIONAL),
             )
         );
     }

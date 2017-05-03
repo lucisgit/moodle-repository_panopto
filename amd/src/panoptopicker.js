@@ -22,10 +22,21 @@
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery'], function($) {
+define(['jquery', 'core/ajax'], function($, ajax) {
+    /** @var {Number} contextid Context id. */
+    var contextid = 0;
 
     var onChangeSessionId = function(event) {
-        console.log(event);
+        if (event.target.value) {
+            var promises = ajax.call([
+                { methodname: 'repository_panopto_get_session_by_id', args: { sessionid: event.target.value, contextid: contextid } },
+            ]);
+            promises[0].done(function(response) {
+                console.log(response);
+            }).fail(function(ex) {
+                console.log(ex);
+            });
+        }
     };
 
     return /** @alias module:repository_panopto/panoptopicker */ {
@@ -36,7 +47,8 @@ define(['jquery'], function($) {
          * @param {Array} options.
          */
         init: function (options) {
-            $('#'+options.element_id).on('change', onChangeSessionId).trigger('change');
+            contextid = options.contextid;
+            $('#'+options.elementid).on('change', onChangeSessionId).trigger('change');
         }
     };
 });
