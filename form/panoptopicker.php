@@ -122,6 +122,7 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
 <button id="filepicker-button-js-{$client_id}" class="visibleifjs">
 $straddlink
 </button>
+<div class="repository_panopto" id="panoptopicker-area"></div>
 EOD;
         }
 

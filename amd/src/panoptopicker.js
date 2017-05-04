@@ -22,7 +22,7 @@
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax'], function($, ajax) {
+define(['jquery', 'core/ajax', 'core/templates', 'core/notification'], function($, ajax, templates, notification) {
     /** @var {Number} contextid Context id. */
     var contextid = 0;
 
@@ -32,11 +32,24 @@ define(['jquery', 'core/ajax'], function($, ajax) {
                 { methodname: 'repository_panopto_get_session_by_id', args: { sessionid: event.target.value, contextid: contextid } },
             ]);
             promises[0].done(function(response) {
-                console.log(response);
+                renderSessionInfo(response);
             }).fail(function(ex) {
-                console.log(ex);
+                ex.backtrace = null;
+                notification.exception(ex);
             });
         }
+    };
+
+    var renderSessionInfo = function(data) {
+        // Render the template.
+        var context = {};
+        if (data.session) {
+            $.extend(context, data.session);
+        }
+        templates.render('repository_panopto/form_panoptopicker', context).done(function(newHTML) {
+            // Add it to the page.
+            $('#panoptopicker-area').empty().append($(newHTML).html());
+        }).fail(notification.exception);
     };
 
     return /** @alias module:repository_panopto/panoptopicker */ {

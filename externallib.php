@@ -70,6 +70,7 @@ class repository_panopto_external extends external_api {
         self::validate_context($context);
         require_capability('repository/panopto:view', $context);
 
+        $result = array();
         $sessiondata = array();
 
         // Instantiate Panopto client.
@@ -91,10 +92,9 @@ class repository_panopto_external extends external_api {
             $sessiondata['name'] = $sessions[0]->getName();
             $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $sessions[0]->getThumbUrl());
             $sessiondata['thumburl'] = $thumburl->out(false);
+            $result['session'] = $sessiondata;
         }
 
-        $result = array();
-        $result['session'] = $sessiondata;
         return $result;
     }
 

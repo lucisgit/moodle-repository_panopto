@@ -27,6 +27,7 @@
 $string['applicationkey'] = 'Identitiy Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
 $string['configplugin'] = 'Panopto configuration';
+$string['errorsessionnotfound'] = 'This session is not found on Panopto side. It might have been removed or accessing rights changed.';
 $string['instancename'] = 'Identitiy Provider Instance Name';
 $string['instancenamedesc'] = 'Instance name from Panopto Identity Providers settings.';
 $string['password'] = 'Panopto API user password';

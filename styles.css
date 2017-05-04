@@ -1,0 +1,12 @@
+/**
+ * File styles.css.
+ * Contains styles for panoptopicker form element.
+ */
+
+.repository_panopto .panoptopicker-area-title {
+    margin: 0 0 10px 5px;
+}
+
+.repository_panopto .panoptopicker-area-thumbnail {
+    max-width: 480px;
+}
