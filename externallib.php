@@ -70,9 +70,6 @@ class repository_panopto_external extends external_api {
         self::validate_context($context);
         require_capability('repository/panopto:view', $context);
 
-        $result = array();
-        $sessiondata = array();
-
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
         $panoptoclient->setAuthenticationInfo(
@@ -81,6 +78,8 @@ class repository_panopto_external extends external_api {
         $smclient = $panoptoclient->SessionManagement();
 
         // Perform the call to Panopto API.
+        $sessions = array();
+        $result = array();
         try {
             $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($params['sessionid']));
             $sessions = $smclient->GetSessionsById($param)->getGetSessionsByIdResult()->getSession();
@@ -90,6 +89,7 @@ class repository_panopto_external extends external_api {
             // This can be plugin settings issue as well, but this is not the right place to catch it.
         }
         if (count($sessions)) {
+            $sessiondata = array();
             $sessiondata['id'] = $sessions[0]->getId();
             $sessiondata['name'] = $sessions[0]->getName();
             $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $sessions[0]->getThumbUrl());
