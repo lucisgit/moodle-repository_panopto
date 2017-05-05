@@ -85,7 +85,9 @@ class repository_panopto_external extends external_api {
             $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($params['sessionid']));
             $sessions = $smclient->GetSessionsById($param)->getGetSessionsByIdResult()->getSession();
         } catch (Exception $e) {
-            throw new invalid_parameter_exception('SOAP call error: ' . $e->getMessage());
+            // If we are here, it means that session is either deleted or we have no rights.
+            // We provide empty response, so that amd will show an appropriate message to user.
+            // This can be plugin settings issue as well, but this is not the right place to catch it.
         }
         if (count($sessions)) {
             $sessiondata['id'] = $sessions[0]->getId();

@@ -71,9 +71,14 @@ class repository_panopto extends repository {
         $panoptoclient->setAuthenticationInfo(
                 get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
         $this->auth = $panoptoclient->getAuthenticationInfo();
-        $this->smclient = $panoptoclient->SessionManagement();
+        try {
+            $this->smclient = $panoptoclient->SessionManagement();
+        } catch (Exception $e) {
+            // TODO: Flag this somehow, most likely there is settings issue or
+            // server is not available.
+        }
 
-        //TODO: IUserManagement.SyncExternalUser
+        // TODO: IUserManagement.SyncExternalUser
     }
 
     /**
