@@ -26,7 +26,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . "/local/panopto/lib/panopto/lib/Client.php");
+require_once($CFG->dirroot . "/repository/panopto/lib/panopto/lib/Client.php");
 require_once($CFG->dirroot . '/repository/lib.php');
 
 /**
