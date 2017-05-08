@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->libdir . "/externallib.php");
-require_once($CFG->dirroot . "/repository/panopto/lib/panopto/lib/Client.php");
+require_once($CFG->dirroot . "/repository/panopto/locallib.php");
 
 /**
  * Panopto repository external API methods.
@@ -71,28 +71,19 @@ class repository_panopto_external extends external_api {
         require_capability('repository/panopto:view', $context);
 
         // Instantiate Panopto client.
-        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
-        $panoptoclient->setAuthenticationInfo(
+        $panoptoclient = new repository_panopto_interface();
+        $panoptoclient->set_authentication_info(
                 get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
-        $auth = $panoptoclient->getAuthenticationInfo();
-        $smclient = $panoptoclient->SessionManagement();
 
         // Perform the call to Panopto API.
         $sessions = array();
         $result = array();
-        try {
-            $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($params['sessionid']));
-            $sessions = $smclient->GetSessionsById($param)->getGetSessionsByIdResult()->getSession();
-        } catch (Exception $e) {
-            // If we are here, it means that session is either deleted or we have no rights.
-            // We provide empty response, so that amd will show an appropriate message to user.
-            // This can be plugin settings issue as well, but this is not the right place to catch it.
-        }
-        if (count($sessions)) {
+        $session = $panoptoclient->get_session_by_id($params['sessionid']);
+        if ($session) {
             $sessiondata = array();
-            $sessiondata['id'] = $sessions[0]->getId();
-            $sessiondata['name'] = $sessions[0]->getName();
-            $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $sessions[0]->getThumbUrl());
+            $sessiondata['id'] = $session->getId();
+            $sessiondata['name'] = $session->getName();
+            $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
             $sessiondata['thumburl'] = $thumburl->out(false);
             $result['session'] = $sessiondata;
         }
