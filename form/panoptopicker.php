@@ -29,7 +29,7 @@ require_once("HTML/QuickForm/input.php");
 /**
  * Panopto video picker form element class.
  *
- * @package    mod_panopto
+ * @package    repository_panopto
  * @copyright  2017 Lancaster University (http://www.lancaster.ac.uk/)
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later

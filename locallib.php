@@ -46,6 +46,12 @@ class repository_panopto_interface {
     /** @var stdClass Session Management client */
     private $smclient;
 
+    /** @var stdClass User Management client */
+    private $umclient;
+
+    /** @var stdClass Access Management client */
+    private $amclient;
+
     /** @var stdClass AuthenticationInfo object */
     private $auth;
 
@@ -56,6 +62,8 @@ class repository_panopto_interface {
         $this->panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
         $this->authclient = $this->panoptoclient->Auth();
         $this->smclient = $this->panoptoclient->SessionManagement();
+        $this->umclient = $this->panoptoclient->UserManagement();
+        $this->amclient = $this->panoptoclient->AccessManagement();
     }
 
     /**
@@ -100,5 +108,52 @@ class repository_panopto_interface {
         $param = new \Panopto\Auth\GetAuthenticatedUrl($this->auth, $viewerurl);
         $authurl = $this->authclient->GetAuthenticatedUrl($param)->getGetAuthenticatedUrlResult();
         return $authurl;
+    }
+
+    /**
+     * Create external group.
+     *
+     * @param string $groupname Name of external group to create.
+     * @return stdClass Group object.
+     */
+    public function create_external_group($groupname) {
+        $param = new \Panopto\UserManagement\CreateExternalGroup($this->auth, $groupname, get_config('panopto', 'instancename'), $groupname, array());
+        $group = $this->umclient->CreateExternalGroup($param)->getCreateExternalGroupResult();
+        return $group;
+    }
+
+    /**
+     * Delete group.
+     *
+     * @param string $groupid group id.
+     * @return void.
+     */
+    public function delete_group($groupid) {
+        $param = new \Panopto\UserManagement\DeleteGroup($this->auth, $groupid);
+        $this->umclient->DeleteGroup($param);
+    }
+
+    /**
+     * Grant group access to session as viewer.
+     *
+     * @param string $groupid Remote group id.
+     * @param string $sessionid Remote session id.
+     * @return void.
+     */
+    public function grant_group_viewer_access_to_session($groupid, $sessionid) {
+        $param = new \Panopto\AccessManagement\GrantGroupViewerAccessToSession($this->auth, $sessionid, $groupid);
+        $this->amclient->GrantGroupViewerAccessToSession($param);
+    }
+
+    /**
+     * Revoke group access from session.
+     *
+     * @param string $groupid Remote group id.
+     * @param string $sessionid Remote session id.
+     * @return void.
+     */
+    public function revoke_group_viewer_access_from_session($groupid, $sessionid) {
+        $param = new \Panopto\AccessManagement\RevokeGroupViewerAccessFromSession($this->auth, $sessionid, $groupid);
+        $this->amclient->RevokeGroupViewerAccessFromSession($param);
     }
 }
