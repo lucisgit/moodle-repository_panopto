@@ -73,12 +73,11 @@ class repository_panopto extends repository {
         $this->auth = $panoptoclient->getAuthenticationInfo();
         try {
             $this->smclient = $panoptoclient->SessionManagement();
+            $this->umclient = $panoptoclient->UserManagement();
         } catch (Exception $e) {
             // TODO: Flag this somehow, most likely there is settings issue or
             // server is not available.
         }
-
-        // TODO: IUserManagement.SyncExternalUser
     }
 
     /**
@@ -90,6 +89,7 @@ class repository_panopto extends repository {
      */
     public function get_listing($path = '', $page = '') {
         // Data preparation.
+        $this->sync_user();
         if (empty($path)) {
             $path = self::ROOT_FOLDER_ID;
         }
@@ -136,6 +136,8 @@ class repository_panopto extends repository {
      * @return  array   A set of results with the same layout as the 'list' element in 'get_listing'.
      */
     public function search($key, $page = 0) {
+        // Data preparation.
+        $this->sync_user();
         // Get the folders and sessions list for the current path.
         $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
         $listfiles = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
@@ -343,5 +345,26 @@ class repository_panopto extends repository {
      */
     public function contains_private_data() {
         return false;
+    }
+
+    /**
+     * Sync user data with Panopto.
+     *
+     * @return void.
+     */
+    private function sync_user() {
+        global $USER;
+        // Check that external user exists, if not, sync user data.
+        $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
+        $user = $this->umclient->GetUserByKey($params)->getGetUserByKeyResult();
+        if ($user === null) {
+            // User does not exist, sync one.
+            $params = new \Panopto\UserManagement\SyncExternalUser($this->auth, $USER->firstname, $USER->lastname, $USER->email, false, array());
+            $this->umclient->SyncExternalUser($params);
+        } elseif (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
+            // User exists, but some data is missing, update contact info.
+            $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
+            $this->umclient->UpdateContactInfo($params);
+        }
     }
 }
