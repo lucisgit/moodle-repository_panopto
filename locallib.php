@@ -125,7 +125,7 @@ class repository_panopto_interface {
     /**
      * Delete group.
      *
-     * @param string $groupid group id.
+     * @param string $groupid Remote group id.
      * @return void.
      */
     public function delete_group($groupid) {
@@ -155,5 +155,40 @@ class repository_panopto_interface {
     public function revoke_group_viewer_access_from_session($groupid, $sessionid) {
         $param = new \Panopto\AccessManagement\RevokeGroupViewerAccessFromSession($this->auth, $sessionid, $groupid);
         $this->amclient->RevokeGroupViewerAccessFromSession($param);
+    }
+
+    /**
+     * Add member to external group.
+     *
+     * @param string $groupid Remote group id.
+     * @param string $userid Remote user id.
+     * @return void.
+     */
+    public function add_member_to_external_group($groupid, $userid) {
+        $param = new \Panopto\UserManagement\AddMembersToExternalGroup($this->auth, get_config('panopto', 'instancename'), $groupid, array($userid));
+        $this->umclient->AddMembersToExternalGroup($param);
+    }
+
+    /**
+     * Sync $USER data with Panopto.
+     *
+     * @return stdClass User object.
+     */
+    public function sync_current_user() {
+        global $USER;
+        // Check that external user exists, if not, sync user data.
+        $getuserbykeyparams = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
+        $user = $this->umclient->GetUserByKey($getuserbykeyparams)->getGetUserByKeyResult();
+        if ($user === null) {
+            // User does not exist, sync one.
+            $params = new \Panopto\UserManagement\SyncExternalUser($this->auth, $USER->firstname, $USER->lastname, $USER->email, false, array());
+            $this->umclient->SyncExternalUser($params);
+            $user = $this->umclient->GetUserByKey($getuserbykeyparams)->getGetUserByKeyResult();
+        } elseif (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
+            // User exists, but some data is missing, update contact info.
+            $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
+            $this->umclient->UpdateContactInfo($params);
+        }
+        return $user;
     }
 }
