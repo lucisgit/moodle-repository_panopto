@@ -89,7 +89,6 @@ class repository_panopto extends repository {
      */
     public function get_listing($path = '', $page = '') {
         // Data preparation.
-        $this->sync_user();
         if (empty($path)) {
             $path = self::ROOT_FOLDER_ID;
         }
@@ -137,7 +136,6 @@ class repository_panopto extends repository {
      */
     public function search($key, $page = 0) {
         // Data preparation.
-        $this->sync_user();
         // Get the folders and sessions list for the current path.
         $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
         $listfiles = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
@@ -350,9 +348,9 @@ class repository_panopto extends repository {
     /**
      * Sync user data with Panopto.
      *
-     * @return void.
+     * @return true.
      */
-    private function sync_user() {
+    public function check_login(){
         global $USER;
         // Check that external user exists, if not, sync user data.
         $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
@@ -366,5 +364,6 @@ class repository_panopto extends repository {
             $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
             $this->umclient->UpdateContactInfo($params);
         }
+        return true;
     }
 }
