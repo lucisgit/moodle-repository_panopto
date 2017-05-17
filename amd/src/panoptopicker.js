@@ -28,9 +28,10 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification'], function(
 
     var onChangeSessionId = function(event) {
         if (event.target.value) {
-            var promises = ajax.call([
-                { methodname: 'repository_panopto_get_session_by_id', args: { sessionid: event.target.value, contextid: contextid } },
-            ]);
+            var promises = ajax.call([{
+                methodname: 'repository_panopto_get_session_by_id',
+                args: { sessionid: event.target.value, contextid: contextid },
+            }]);
             promises[0].done(function(response) {
                 renderSessionInfo(response);
             }).fail(function(ex) {
