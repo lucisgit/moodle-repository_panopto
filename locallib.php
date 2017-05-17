@@ -180,6 +180,18 @@ class repository_panopto_interface {
     }
 
     /**
+     * Delete member from external group.
+     *
+     * @param string $externalgroupid Remote EXTERNAL group id.
+     * @param array $userids Remote user ids.
+     * @return void.
+     */
+    public function remove_members_from_external_group($externalgroupid, $userids) {
+        $param = new \Panopto\UserManagement\RemoveMembersFromExternalGroup($this->adminauth, get_config('panopto', 'instancename'), $externalgroupid, $userids);
+        $this->umclient->RemoveMembersFromExternalGroup($param);
+    }
+
+    /**
      * Sync $USER data with Panopto.
      *
      * AuthenticationInfo object needs to be set to the current user to make this work.
