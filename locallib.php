@@ -151,8 +151,14 @@ class repository_panopto_interface {
      * @return void.
      */
     public function grant_group_viewer_access_to_session($groupid, $sessionid) {
-        $param = new \Panopto\AccessManagement\GrantGroupViewerAccessToSession($this->adminauth, $sessionid, $groupid);
-        $this->amclient->GrantGroupViewerAccessToSession($param);
+        $param = new \Panopto\AccessManagement\GetSessionAccessDetails($this->adminauth, $sessionid);
+        $sessionaccessdetails = $this->amclient->GetSessionAccessDetails($param)->getGetSessionAccessDetailsResult();
+        $sessionaccessdetails = $sessionaccessdetails->getGroupsWithDirectViewerAccess()->getGuid();
+
+        if ($sessionaccessdetails === null || !in_array($groupid, $sessionaccessdetails)) {
+            $param = new \Panopto\AccessManagement\GrantGroupViewerAccessToSession($this->adminauth, $sessionid, $groupid);
+            $this->amclient->GrantGroupViewerAccessToSession($param);
+        }
     }
 
     /**
