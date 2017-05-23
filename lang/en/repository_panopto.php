@@ -24,6 +24,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+$string['bouncepageurl'] = 'Bounce Page URL';
+$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to make SSO work.';
 $string['applicationkey'] = 'Identitiy Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
 $string['configplugin'] = 'Panopto configuration';

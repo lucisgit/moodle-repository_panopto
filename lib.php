@@ -284,6 +284,7 @@ class repository_panopto extends repository {
      * @param string $classname repository class name.
      */
     public static function type_config_form($mform, $classname = 'repository') {
+        global $DB;
         parent::type_config_form($mform);
         $strrequired = get_string('required');
 
@@ -316,6 +317,11 @@ class repository_panopto extends repository {
         $mform->addRule('applicationkey', $strrequired, 'required', null, 'client');
         $mform->setType('applicationkey', PARAM_RAW_TRIMMED);
         $mform->addElement('static', 'applicationkeydesc', '', get_string('applicationkeydesc', 'repository_panopto'));
+
+        // Display Bounce Page URL for Identity Privder setup.
+        $type = $DB->get_record('repository', array('type' => 'panopto'));
+        $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $type->id));
+        $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
     }
 
     /**
@@ -365,5 +371,46 @@ class repository_panopto extends repository {
             $this->umclient->UpdateContactInfo($params);
         }
         return true;
+    }
+
+    /**
+     * Callback for SSO processing.
+     *
+     * @return true.
+     */
+    public function callback() {
+        global $USER;
+
+        $authcode = required_param("authCode", PARAM_ALPHANUM);
+        $servername = required_param("serverName", PARAM_HOST);
+        $callbackurl = required_param("callbackURL", PARAM_URL);
+        $expiration = required_param("expiration", PARAM_RAW);
+        $action = optional_param("action", "", PARAM_ALPHA);
+
+        // Verify provided authcode.
+        $authpayload = "serverName=" . $servername . "&expiration=" . $expiration;
+        $authpayload = $authpayload . "|" . get_config('panopto', 'applicationkey');
+        $encodedpayload = strtoupper(sha1($authpayload));
+
+        if ($encodedpayload !== $authcode) {
+            throw new \invalid_parameter_exception('Invalid auth code provided.');
+        }
+
+        // Craft the response to Panopto.
+        $userkey = get_config('panopto', 'instancename') . '\\' . $USER->username;
+        $responseparams = "serverName=" . $servername . "&externalUserKey=" . $userkey . "&expiration=" . $expiration;
+        $responseparams = $responseparams . "|" . get_config('panopto', 'applicationkey');
+        $responseauthcode = strtoupper(sha1($responseparams));
+
+        $urlparams = array(
+            'serverName' => $servername,
+            'externalUserKey' => $userkey,
+            'expiration' => $expiration,
+            'authCode' => $responseauthcode,
+        );
+        $redirecturl = new \moodle_url($callbackurl, $urlparams);
+
+        // Redirect to Panopto.
+        redirect($redirecturl->out(true));
     }
 }
