@@ -352,11 +352,23 @@ class repository_panopto extends repository {
     }
 
     /**
-     * Sync user data with Panopto.
+     * Use check login for syncling user data with Panopto.
      *
      * @return true.
      */
     public function check_login(){
+        $this->sync_user();
+        return true;
+    }
+
+    /**
+     * Sync user data with Panopto.
+     *
+     * This will create user on Panopto side if needed and populate user data.
+     *
+     * @return void.
+     */
+    private function sync_user(){
         global $USER;
         // Check that external user exists, if not, sync user data.
         $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
@@ -370,7 +382,6 @@ class repository_panopto extends repository {
             $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
             $this->umclient->UpdateContactInfo($params);
         }
-        return true;
     }
 
     /**
@@ -395,6 +406,9 @@ class repository_panopto extends repository {
         if ($encodedpayload !== $authcode) {
             throw new \invalid_parameter_exception('Invalid auth code provided.');
         }
+
+        // Sync user data.
+        $this->sync_user();
 
         // Craft the response to Panopto.
         $userkey = get_config('panopto', 'instancename') . '\\' . $USER->username;
