@@ -3,10 +3,18 @@
  * Contains styles for panoptopicker form element.
  */
 
+.panoptopicker-button {
+    margin: 0 0 10px 0;
+}
+
 .repository_panopto .panoptopicker-area-title {
     margin: 0 0 10px 5px;
+    display: inline-block;
+    font-weight: bold;
+    width: 120px;
 }
 
 .repository_panopto .panoptopicker-area-thumbnail {
     max-width: 480px;
+    margin: 0 0 10px 5px;
 }

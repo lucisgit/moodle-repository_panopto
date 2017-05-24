@@ -83,6 +83,9 @@ class repository_panopto_external extends external_api {
             $sessiondata = array();
             $sessiondata['id'] = $session->getId();
             $sessiondata['name'] = $session->getName();
+            $sessiondata['created'] = userdate($session->getStartTime()->format('U'), get_string('strftimedatetimeshort'));
+            $sessiondata['duration'] = format_time($session->getDuration());
+            $sessiondata['viewerurl'] = $session->getViewerUrl();
             $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
             $sessiondata['thumburl'] = $thumburl->out(false);
             $result['session'] = $sessiondata;
@@ -104,6 +107,9 @@ class repository_panopto_external extends external_api {
                     array(
                         'id'                => new external_value(PARAM_TEXT, 'session id'),
                         'name'              => new external_value(PARAM_TEXT, 'session name'),
+                        'created'           => new external_value(PARAM_TEXT, 'session created timestamp'),
+                        'duration'          => new external_value(PARAM_TEXT, 'session duration'),
+                        'viewerurl'         => new external_value(PARAM_TEXT, 'session viewer url'),
                         'thumburl'          => new external_value(PARAM_URL, 'session thumb url'),
                     ), 'session data', VALUE_OPTIONAL),
             )

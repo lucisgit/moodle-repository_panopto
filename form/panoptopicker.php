@@ -119,7 +119,7 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
         if (count($options->repositories) > 0) {
             $straddlink = get_string('chooseavideo', 'panopto');
             $str .= <<<EOD
-<button id="filepicker-button-js-{$client_id}" class="visibleifjs">
+<button id="filepicker-button-js-{$client_id}" class="visibleifjs panoptopicker-button">
 $straddlink
 </button>
 <div class="repository_panopto" id="panoptopicker-area"></div>

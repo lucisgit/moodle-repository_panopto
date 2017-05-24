@@ -24,18 +24,23 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['bouncepageurl'] = 'Bounce Page URL';
-$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to make SSO work.';
 $string['applicationkey'] = 'Identitiy Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
+$string['bouncepageurl'] = 'Bounce Page URL';
+$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to make SSO work.';
 $string['configplugin'] = 'Panopto configuration';
+$string['created'] = 'Created';
+$string['duration'] = 'Duration';
 $string['errorsessionnotfound'] = 'This session is not found on Panopto side. It might have been removed or accessing rights changed.';
 $string['instancename'] = 'Identitiy Provider Instance Name';
 $string['instancenamedesc'] = 'Instance name from Panopto Identity Providers settings.';
+$string['viewerurl'] = 'URL';
 $string['password'] = 'Panopto API user password';
 $string['passworddesc'] = 'Password for API user authentication.';
 $string['pluginname'] = 'Panopto';
-$string['userkey'] = 'Panopto API username';
-$string['userkeydesc'] = 'User on the Panopto server to use for API calls, it needs to have Administrator rights.';
 $string['serverhostname'] = 'Panopto server hostname';
 $string['serverhostnamedesc'] = 'FQDN of your Panopto server, e.g. \'demo.hosted.panopto.com\'.';
+$string['title'] = 'Title';
+$string['userkey'] = 'Panopto API username';
+$string['userkeydesc'] = 'User on the Panopto server to use for API calls, it needs to have Administrator rights.';
+$string['viewonpanopto'] = 'View this video on Panopto';
