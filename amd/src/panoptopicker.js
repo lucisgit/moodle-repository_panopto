@@ -22,12 +22,14 @@
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/templates', 'core/notification'], function($, ajax, templates, notification) {
+define(['jquery', 'core/ajax', 'core/templates', 'core/notification', 'core/url'], function($, ajax, templates, notification, url) {
     /** @var {Number} contextid Context id. */
     var contextid = 0;
 
     var onChangeSessionId = function(event) {
         if (event.target.value) {
+            $('#panoptopicker-area').empty();
+            addSpinner($('#panoptopicker-area'));
             var promises = ajax.call([{
                 methodname: 'repository_panopto_get_session_by_id',
                 args: { sessionid: event.target.value, contextid: contextid },
@@ -38,6 +40,20 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification'], function(
                 ex.backtrace = null;
                 notification.exception(ex);
             });
+        }
+    };
+
+    var addSpinner = function(element) {
+        element.addClass('updating');
+        var spinner = element.find('img.spinner');
+        if (spinner.length) {
+            spinner.show();
+        } else {
+            spinner = $('<img/>')
+                    .attr('src', url.imageUrl('i/loading_small'))
+                    .addClass('spinner').addClass('smallicon')
+                ;
+            element.append(spinner);
         }
     };
 
