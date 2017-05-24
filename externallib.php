@@ -78,9 +78,18 @@ class repository_panopto_external extends external_api {
         // Perform the call to Panopto API.
         $sessions = array();
         $result = array();
+        $sessiondata = array('canaccess' => true);
         $session = $panoptoclient->get_session_by_id($params['sessionid']);
+
+        if (!$session) {
+            // Try as admin, if session exists display the data, but notify user about access issue.
+            // This might happen when a course teacher is editing the Panopto activity,
+            // which has been added by the different teacher.
+            $session = $panoptoclient->get_session_by_id($params['sessionid'], true);
+            $sessiondata['canaccess'] = false;
+        }
+
         if ($session) {
-            $sessiondata = array();
             $sessiondata['id'] = $session->getId();
             $sessiondata['name'] = $session->getName();
             $sessiondata['created'] = userdate($session->getStartTime()->format('U'), get_string('strftimedatetimeshort'));
@@ -111,6 +120,7 @@ class repository_panopto_external extends external_api {
                         'duration'          => new external_value(PARAM_TEXT, 'session duration'),
                         'viewerurl'         => new external_value(PARAM_TEXT, 'session viewer url'),
                         'thumburl'          => new external_value(PARAM_URL, 'session thumb url'),
+                        'canaccess'         => new external_value(PARAM_BOOL, 'session access flag'),
                     ), 'session data', VALUE_OPTIONAL),
             )
         );

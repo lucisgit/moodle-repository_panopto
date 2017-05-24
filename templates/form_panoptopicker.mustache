@@ -17,16 +17,24 @@
 {{!
     @template repository_panopto/form_panoptopicker
 
-    Displays Panopto video thumbnail and title.
+    Displays Panopto video thumbnail and other session data.
 
     Example context (json):
     {
+        "id": "00000000-0000-0000-0000-000000000000",
         "name": "test",
-        "thumburl": "URL"
+        "thumburl": "URL",
+        "created": "14\/03\/17, 16:15",
+        "duration": "2 mins 50.84 secs",
+        "viewerurl": "URL",
+        "canaccess": true
     }
 }}
 <div>
     {{#name}}
+        {{^canaccess}}
+            <div><span id="id_error_name" class="error" tabindex="0">{{#str}}errornosessionaccess, repository_panopto{{/str}}</span></div>
+        {{/canaccess}}
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}title, repository_panopto{{/str}}</label><span>{{name}}</span></div>
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}created, repository_panopto{{/str}}</label><span>{{created}}</span></div>
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}duration, repository_panopto{{/str}}</label><span>{{duration}}</span></div>
@@ -34,6 +42,6 @@
         <img class="panoptopicker-area-thumbnail" src="{{thumburl}}" />
     {{/name}}
     {{^name}}
-        <span>{{#str}}errorsessionnotfound, repository_panopto{{/str}}</span>
+        <div><span id="id_error_name" class="error" tabindex="0">{{#str}}errorsessionnotfound, repository_panopto{{/str}}</span></div>
     {{/name}}
 </div>
