@@ -27,7 +27,8 @@
 $string['applicationkey'] = 'Identitiy Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
 $string['bouncepageurl'] = 'Bounce Page URL';
-$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to make SSO work.';
+$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to enable SSO.';
+$string['bouncepageurlnotreadydesc'] = 'Visit this page after saving plugin configuration to look up Bounce Page URL you need to use in Panopto Identity Providers settings.';
 $string['configplugin'] = 'Panopto configuration';
 $string['created'] = 'Created';
 $string['duration'] = 'Duration';

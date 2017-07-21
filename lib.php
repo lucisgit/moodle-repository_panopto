@@ -320,8 +320,12 @@ class repository_panopto extends repository {
 
         // Display Bounce Page URL for Identity Privder setup.
         $type = $DB->get_record('repository', array('type' => 'panopto'));
-        $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $type->id));
-        $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
+        if ($type) {
+            $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $type->id));
+            $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
+        } else {
+            $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurlnotreadydesc', 'repository_panopto'));
+        }
     }
 
     /**
