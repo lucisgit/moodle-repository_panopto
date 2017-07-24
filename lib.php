@@ -285,6 +285,10 @@ class repository_panopto extends repository {
      */
     public static function type_config_form($mform, $classname = 'repository') {
         global $DB;
+
+        // Notice about repo availability.
+        $mform->addElement('static', 'pluginnotice', '', html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), array('class' => 'warning')));
+
         parent::type_config_form($mform);
         $strrequired = get_string('required');
 
@@ -322,9 +326,9 @@ class repository_panopto extends repository {
         $type = $DB->get_record('repository', array('type' => 'panopto'));
         if ($type) {
             $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $type->id));
-            $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
+            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
         } else {
-            $mform->addElement('static', 'pluginnamehelp', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurlnotreadydesc', 'repository_panopto'));
+            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurlnotreadydesc', 'repository_panopto'));
         }
     }
 

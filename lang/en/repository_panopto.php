@@ -40,6 +40,7 @@ $string['viewerurl'] = 'URL';
 $string['password'] = 'Panopto API user password';
 $string['passworddesc'] = 'Password for API user authentication.';
 $string['pluginname'] = 'Panopto';
+$string['pluginnotice'] = 'Notice, this repository plugin is designed to work with Panopto Activity module only. Please make sure you have mod_panopto installed. This repositiry can\'t be used outside mod_panopto at the moment.';
 $string['serverhostname'] = 'Panopto server hostname';
 $string['serverhostnamedesc'] = 'FQDN of your Panopto server, e.g. \'demo.hosted.panopto.com\'.';
 $string['title'] = 'Title';
