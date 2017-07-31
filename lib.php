@@ -50,6 +50,8 @@ class repository_panopto extends repository {
     /** @var stdClass AuthenticationInfo object */
     private $auth;
 
+    /** @var stdClass AuthenticationInfo object for admin */
+    private $adminauth;
     /**
      * Constructor
      *
@@ -68,6 +70,8 @@ class repository_panopto extends repository {
 
         // Instantiate Panopto client.
         $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
+        $panoptoclient->setAuthenticationInfo(get_config('panopto', 'userkey'), get_config('panopto', 'password'));
+        $this->adminauth = $panoptoclient->getAuthenticationInfo();
         $panoptoclient->setAuthenticationInfo(
                 get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
         $this->auth = $panoptoclient->getAuthenticationInfo();
@@ -117,15 +121,80 @@ class repository_panopto extends repository {
         }
 
         // Get the folders and sessions list for the current path.
-        $listfolders = $this->get_folders_list($path);
-        $listfiles = $this->get_sessions_list($path);
-        $list = array_merge($listfolders, $listfiles);
+        $listfolders = $this->get_folders_list();
+        $listsessions = $this->get_sessions_list();
+
+        // Retrieve missing folders.
+        $missingfolders = array();
+        foreach ($listfolders as $folder) {
+            if (isset($folder['parentfolder']) && !isset($listfolders[$folder['parentfolder']]) && !isset($missingfolders[$folder['parentfolder']])) {
+                // Missing folder.
+                $this->complete_folders_tree($folder['parentfolder'], $missingfolders, $listfolders);
+            }
+        }
+
+        // Build the tree.
+        $listfolders = array_merge($listfolders, $missingfolders);
+        $listfolders = $this->build_folders_tree($listfolders, null);
 
         // Output result.
         $listing = $this->get_base_listing();
-        $listing['list'] = $list;
+        $listing['list'] = $listfolders;
         $listing['path'] = $navpath;
         return $listing;
+    }
+
+    /**
+     * Converts flat list of directories with parent data into tree structure
+     * suitable for get_listing output.
+     *
+     * @param array $listfolders list of the folders to use.
+     * @param string $parent parent folder to build the list of child directires for.
+     * @return array $tree directiry tree structure.
+     */
+    public function build_folders_tree($listfolders = array(), $parent = null) {
+        $tree = array();
+        foreach($listfolders as $folderid => $folder) {
+            if ($folder['parentfolder'] === $parent) {
+                unset($folder['parentfolder']);
+                unset($listfolders[$folderid]);
+                $folder['children'] = $this->build_folders_tree($listfolders, $folderid);
+                $tree[] = $folder;
+            }
+        }
+        return $tree;
+    }
+
+    /**
+     * Get a flat tree of Panopto directories. Recursively go back from $folderid to root
+     * using parent folder and populate $folders array in a form of plain
+     * list of folder items in a format similar to one returned by get_folders_list.
+     *
+     * @param string $folderid folder id to use as final in the tree.
+     * @param array $folders Retrieved folders in the tree.
+     * @param array $listfolders Reference array of existing list of folders (not to retrieve same folder twice).
+     */
+    public function complete_folders_tree($folderid, &$folders, $listfolders = array()) {
+        global $OUTPUT;
+        // Fetch folder data.
+        $param = new \Panopto\SessionManagement\GetFoldersById($this->adminauth, array($folderid));
+        $folder = $this->smclient->GetFoldersById($param)->getGetFoldersByIdResult()[0];
+        if (!empty($folder)) {
+            // Define new folder in $folders array.
+            $folders[$folder->getId()] = array(
+                'title' => $folder->getName(),
+                'shorttitle' => $folder->getName(),
+                'path' => '',
+                'thumbnail' => $OUTPUT->image_url('f/folder-32')->out(false),
+                'children' => array(),
+                // Techical data we need to build directory tree.
+                'parentfolder' => $folder->getParentFolder(),
+            );
+            if ($folder->getParentFolder() !== null && !isset($listfolders[$folder->getParentFolder()]) && !isset($missingfolders[$folder->getParentFolder()])) {
+                // If parent is not known,
+                $this->complete_folders_tree($folder->getParentFolder(), $folders, $listfolders);
+            }
+        }
     }
 
     /**
@@ -137,8 +206,8 @@ class repository_panopto extends repository {
     public function search($key, $page = 0) {
         // Data preparation.
         // Get the folders and sessions list for the current path.
-        $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
-        $listfiles = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
+        $listfolders = $this->get_folders_list($key);
+        $listfiles = $this->get_sessions_list($key);
         $list = array_merge($listfolders, $listfiles);
 
         // Output result.
@@ -149,13 +218,12 @@ class repository_panopto extends repository {
     }
 
     /**
-     * Given a path, get a list of Panopto directories.
+     * Get a list of Panopto directories.
      *
-     * @param string $path identifier for current path.
      * @param string $search the search query.
      * @return array list of folders with the same layout as the 'list' element in 'get_listing'.
      */
-    private function get_folders_list($path, $search = '') {
+    private function get_folders_list($search = '') {
         global $OUTPUT;
         $list = array();
 
@@ -173,12 +241,6 @@ class repository_panopto extends repository {
         // also a good idea to search by relevance.
         if (!empty($search)) {
             $request->setWildcardSearchNameOnly(true);
-        } else {
-            // Split the path requested.
-            $patharray = explode('/', $path);
-            // Determine the curent directory to show.
-            $currentfolderid = end($patharray);
-            $request->setParentFolderId($currentfolderid);
         }
 
         $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, $search);
@@ -188,11 +250,14 @@ class repository_panopto extends repository {
         // Processing GetFoldersList result.
         if ($totalfolders) {
             foreach ($folders->getResults() as $folder) {
-                $list[] = array(
+                $list[$folder->getId()] = array(
                     'title' => $folder->getName(),
-                    'path' => $path . '/' . $folder->getId(),
-                    'thumbnail' => $OUTPUT->pix_url('f/folder-32')->out(false),
+                    'shorttitle' => $folder->getName(),
+                    'path' => '',
+                    'thumbnail' => $OUTPUT->image_url('f/folder-32')->out(false),
                     'children' => array(),
+                    // Techical data we need to build directory tree.
+                    'parentfolder' => $folder->getParentFolder(),
                 );
             }
         }
@@ -200,14 +265,15 @@ class repository_panopto extends repository {
     }
 
     /**
-     * Given a path, get a list of Panopto sessions available for viewing.
+     * Get a list of Panopto sessions available for viewing in each directory.
      *
-     * @param string $path identifier for current path.
+     * List of files with the same layout as the 'list' element in 'get_listing',
+     * but with parent directory data. Basically array of arrays with key set to parent directory.
+     *
      * @param string $search the search query.
-     * @return array list of files with the same layout as the 'list' element in 'get_listing'.
+     * @return array $list list of arrays of files.
      */
-    private function get_sessions_list($path, $search = '') {
-        global $OUTPUT;
+    private function get_sessions_list($search = '') {
         $list = array();
 
         // Build the GetFoldersList request and perform the call.
@@ -221,15 +287,6 @@ class repository_panopto extends repository {
         $request->setSortIncreasing(true);
         $request->setStates(array('Complete'));
 
-        // If we are not searching, set parent folder.
-        if (empty($search)) {
-            // Split the path requested.
-            $patharray = explode('/', $path);
-            // Determine the curent directory to show.
-            $currentfolderid = end($patharray);
-            $request->setFolderId($currentfolderid);
-        }
-
         $param = new \Panopto\SessionManagement\GetSessionsList($this->auth, $request, $search);
         $sessions = $this->smclient->GetSessionsList($param)->getGetSessionsListResult();
         $totalsessions = $sessions->getTotalNumberResults();
@@ -237,10 +294,19 @@ class repository_panopto extends repository {
         // Processing GetFoldersList result.
         if ($totalsessions) {
             foreach ($sessions->getResults() as $session) {
+                // Define parent folder array.
+                $parentfolderid = $session->getFolderId();
+                if (empty($parentfolderid)) {
+                    $parentfolderid = self::ROOT_FOLDER_ID;
+                }
+                if (!isset($list[$parentfolderid])) {
+                    $list[$parentfolderid] = array();
+                }
+                // Add session data.
                 $title = $session->getName();
                 $url = new moodle_url($session->getViewerUrl());
                 $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
-                $list[] = array(
+                $list[$parentfolderid][] = array(
                     'shorttitle' => $title,
                     'title' => $title,
                     'source' => $session->getId(),
@@ -261,7 +327,7 @@ class repository_panopto extends repository {
      */
     private function get_base_listing() {
         return array(
-            'dynload' => true,
+            'dynload' => false,
             'nologin' => true,
             'path' => array(array('name' => get_string('pluginname', 'repository_panopto'), 'path' => self::ROOT_FOLDER_ID)),
             'list' => array(),
