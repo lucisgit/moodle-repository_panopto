@@ -120,22 +120,33 @@ class repository_panopto extends repository {
             }
         }
 
-        // Get the folders and sessions list for the current path.
+        // Get the folders and sessions list.
         $listfolders = $this->get_folders_list();
         $listsessions = $this->get_sessions_list();
 
-        // Retrieve missing folders.
-        $missingfolders = array();
-        foreach ($listfolders as $folder) {
-            if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']]) && !isset($missingfolders[$folder['parentfolderid']])) {
-                // Missing folder.
-                $this->complete_folders_tree($folder['parentfolderid'], $missingfolders, $listfolders);
+        // Process folders and replace missing parent folders with root.
+        foreach ($listfolders as $folderid => $folder) {
+            if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
+                // Missing parent folder, set to root.
+                $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
+            }
+        }
+
+        // Process sessions and move those with missing parent folder to root.
+        $rootsessions = array(self::ROOT_FOLDER_ID => array());
+        foreach ($listsessions as $parentfolderid => $sessionsarray) {
+            if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
+                // Missing parent folder.
+                $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
+            } else {
+                $listsessionsprocessed[$parentfolderid] = $sessionsarray;
             }
         }
 
         // Build the tree.
-        $listfolders = array_merge($listfolders, $missingfolders);
-        $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessions);
+        $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed);
+        // Add root level sessions.
+        $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
 
         // Output result.
         $listing = $this->get_base_listing();
@@ -170,43 +181,6 @@ class repository_panopto extends repository {
             }
         }
         return $tree;
-    }
-
-    /**
-     * Get a flat tree of Panopto directories. Recursively go back from $folderid to root
-     * using parent folder and populate $folders array in a form of plain
-     * list of folder items in a format similar to one returned by get_folders_list.
-     *
-     * @param string $folderid folder id to use as final in the tree.
-     * @param array $folders Retrieved folders in the tree.
-     * @param array $listfolders Reference array of existing list of folders (not to retrieve same folder twice).
-     */
-    public function complete_folders_tree($folderid, &$folders, $listfolders = array()) {
-        global $OUTPUT;
-        // Fetch folder data.
-        $param = new \Panopto\SessionManagement\GetFoldersById($this->adminauth, array($folderid));
-        $folder = $this->smclient->GetFoldersById($param)->getGetFoldersByIdResult()[0];
-        if (!empty($folder)) {
-            // Determine parent folder.
-            $parentfolderid = $folder->getParentFolder();
-            if (empty($parentfolderid)) {
-                $parentfolderid = self::ROOT_FOLDER_ID;
-            }
-            // Define new folder in $folders array.
-            $folders[$folder->getId()] = array(
-                'title' => $folder->getName(),
-                'shorttitle' => $folder->getName(),
-                'path' => '',
-                'thumbnail' => $OUTPUT->image_url('f/folder-32')->out(false),
-                'children' => array(),
-                // Techical data we need to build directory tree.
-                'parentfolderid' => $parentfolderid,
-            );
-            if ($parentfolderid != self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid]) && !isset($folders[$parentfolderid])) {
-                // If parent is not known,
-                $this->complete_folders_tree($parentfolderid, $folders, $listfolders);
-            }
-        }
     }
 
     /**
