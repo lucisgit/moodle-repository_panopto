@@ -193,8 +193,8 @@ class repository_panopto extends repository {
         // Data preparation.
         // Get the folders and sessions list for the current path.
         $listfolders = $this->get_folders_list($key);
-        $listfiles = $this->get_sessions_list($key);
-        $list = array_merge($listfolders, $listfiles);
+        $listsessions = $this->get_sessions_list($key);
+        $list = array_merge($listfolders, $listsessions[self::ROOT_FOLDER_ID]);
 
         // Output result.
         $listing = $this->get_base_listing();
@@ -287,7 +287,7 @@ class repository_panopto extends repository {
             foreach ($sessions->getResults() as $session) {
                 // Define parent folder array.
                 $parentfolderid = $session->getFolderId();
-                if (empty($parentfolderid)) {
+                if (empty($parentfolderid) || !empty($search)) {
                     $parentfolderid = self::ROOT_FOLDER_ID;
                 }
                 if (!isset($list[$parentfolderid])) {
