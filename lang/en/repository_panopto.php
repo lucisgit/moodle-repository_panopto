@@ -37,6 +37,7 @@ $string['errornosessionaccess'] = 'You do not have access rights to this session
 $string['instancename'] = 'Identitiy Provider Instance Name';
 $string['instancenamedesc'] = 'Instance name from Panopto Identity Providers settings.';
 $string['viewerurl'] = 'URL';
+$string['panopto:view'] = 'View Panopto repository';
 $string['password'] = 'Panopto API user password';
 $string['passworddesc'] = 'Password for API user authentication.';
 $string['pluginname'] = 'Panopto';
