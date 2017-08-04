@@ -120,33 +120,47 @@ class repository_panopto extends repository {
             }
         }
 
-        // Get the folders and sessions list.
-        $listfolders = $this->get_folders_list();
-        $listsessions = $this->get_sessions_list();
-
-        // Process folders and replace missing parent folders with root.
-        foreach ($listfolders as $folderid => $folder) {
-            if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
-                // Missing parent folder, set to root.
-                $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
-            }
+        // Cache setup.
+        $cache = cache::make('repository_panopto', 'folderstree');
+        if ($cache->get('lastupdated') && (time() - (int) $cache->get('lastupdated') > (int) get_config('panopto', 'folderstreecachettl'))) {
+            // Invalidate cache after timeout.
+            $cache->purge();
         }
 
-        // Process sessions and move those with missing parent folder to root.
-        $rootsessions = array(self::ROOT_FOLDER_ID => array());
-        foreach ($listsessions as $parentfolderid => $sessionsarray) {
-            if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
-                // Missing parent folder.
-                $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
-            } else {
-                $listsessionsprocessed[$parentfolderid] = $sessionsarray;
-            }
-        }
+        // Retrieve folders tree from cache, if it does not exist, build one.
+        $listfolders = $cache->get('listfolders');
+        if ($listfolders === false) {
+            // Get the folders and sessions list.
+            $listfolders = $this->get_folders_list();
+            $listsessions = $this->get_sessions_list();
 
-        // Build the tree.
-        $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed);
-        // Add root level sessions.
-        $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
+            // Process folders and replace missing parent folders with root.
+            foreach ($listfolders as $folderid => $folder) {
+                if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
+                    // Missing parent folder, set to root.
+                    $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
+                }
+            }
+
+            // Process sessions and move those with missing parent folder to root.
+            $rootsessions = array(self::ROOT_FOLDER_ID => array());
+            foreach ($listsessions as $parentfolderid => $sessionsarray) {
+                if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
+                    // Missing parent folder.
+                    $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
+                } else {
+                    $listsessionsprocessed[$parentfolderid] = $sessionsarray;
+                }
+            }
+
+            // Build the tree.
+            $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed);
+            // Add root level sessions.
+            $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
+
+            // Store result in cache.
+            $cache->set_many(array('listfolders' => $listfolders, 'lastupdated' => time()));
+        }
 
         // Output result.
         $listing = $this->get_base_listing();
@@ -331,7 +345,7 @@ class repository_panopto extends repository {
      * @return array of option names.
      */
     public static function get_type_option_names() {
-        return array('serverhostname', 'userkey', 'password', 'instancename', 'applicationkey', 'pluginname');
+        return array('serverhostname', 'userkey', 'password', 'instancename', 'applicationkey', 'pluginname', 'folderstreecachettl');
     }
 
     /**
@@ -345,9 +359,17 @@ class repository_panopto extends repository {
 
         // Notice about repo availability.
         $mform->addElement('static', 'pluginnotice', '', html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), array('class' => 'warning')));
-
-        parent::type_config_form($mform);
         $strrequired = get_string('required');
+        parent::type_config_form($mform);
+
+        // Folder tree cache ttl.
+        $mform->addElement('text', 'folderstreecachettl', get_string('folderstreecachettl', 'repository_panopto'));
+        $mform->setType('folderstreecachettl', PARAM_INT);
+        $mform->setDefault('folderstreecachettl', 300);
+        $mform->addElement('static', 'folderstreecachettldesc', '', get_string('folderstreecachettldesc', 'repository_panopto'));
+
+        // Header.
+        $mform->addElement('header', 'connectionsettings', get_string('connectionsettings', 'repository_panopto'));
 
         // Server hostname.
         $mform->addElement('text', 'serverhostname', get_string('serverhostname', 'repository_panopto'));
