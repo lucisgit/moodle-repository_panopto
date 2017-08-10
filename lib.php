@@ -112,34 +112,33 @@ class repository_panopto extends repository {
             $listfolders = $this->get_folders_list();
             $listsessions = $this->get_sessions_list();
 
-            if (count($listfolders) || count($listsessions)) {
-                // Process folders and replace missing parent folders with root.
-                foreach ($listfolders as $folderid => $folder) {
-                    if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
-                        // Missing parent folder, set to root.
-                        $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
-                    }
+            // Process folders and replace missing parent folders with root.
+            foreach ($listfolders as $folderid => $folder) {
+                if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
+                    // Missing parent folder, set to root.
+                    $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
                 }
+            }
 
-                // Process sessions and move those with missing parent folder to root.
-                foreach ($listsessions as $parentfolderid => $sessionsarray) {
-                    if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
-                        // Missing parent folder.
-                        $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
-                    } else {
-                        $listsessionsprocessed[$parentfolderid] = $sessionsarray;
-                    }
+            // Process sessions and move those with missing parent folder to root.
+            $listsessionsprocessed = array(self::ROOT_FOLDER_ID => array());
+            foreach ($listsessions as $parentfolderid => $sessionsarray) {
+                if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
+                    // Missing parent folder.
+                    $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
+                } else {
+                    $listsessionsprocessed[$parentfolderid] = $sessionsarray;
                 }
+            }
 
-                // Build the tree.
-                $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed, self::ROOT_FOLDER_ID);
-                // Add root level sessions.
-                $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
+            // Build the tree.
+            $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed, self::ROOT_FOLDER_ID);
+            // Add root level sessions.
+            $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
 
-                // Store result in cache.
-                if (count($listfolders)) {
-                    $cache->set_many(array('listfolders' => $listfolders, 'lastupdated' => time()));
-                }
+            // Store result in cache.
+            if (count($listfolders)) {
+                $cache->set_many(array('listfolders' => $listfolders, 'lastupdated' => time()));
             }
         }
 
