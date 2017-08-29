@@ -244,11 +244,11 @@ class repository_panopto extends repository {
             $request->setWildcardSearchNameOnly(true);
         }
 
-        $param = new \Panopto\SessionManagement\GetFoldersList($this->auth, $request, $search);
-        $folders = $this->smclient->GetFoldersList($param)->getGetFoldersListResult();
+        $param = new \Panopto\SessionManagement\GetCreatorFoldersList($this->auth, $request, $search);
+        $folders = $this->smclient->GetCreatorFoldersList($param)->getGetCreatorFoldersListResult();
         $totalfolders = $folders->getTotalNumberResults();
 
-        // Processing GetFoldersList result.
+        // Processing GetCreatorFoldersList result.
         if ($totalfolders) {
             foreach ($folders->getResults() as $folder) {
                 // Determine parent folder.
