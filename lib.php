@@ -97,50 +97,7 @@ class repository_panopto extends repository {
             $path = self::ROOT_FOLDER_ID;
         }
         $navpath = array();
-
-        // Cache setup.
-        $cache = cache::make('repository_panopto', 'folderstree');
-        if ($cache->get('lastupdated') && (time() - (int) $cache->get('lastupdated') > (int) get_config('panopto', 'folderstreecachettl'))) {
-            // Invalidate cache after timeout.
-            $cache->purge();
-        }
-
-        // Retrieve folders tree from cache, if it does not exist, build one.
-        $listfolders = $cache->get('listfolders');
-        if ($listfolders === false) {
-            // Get the folders and sessions list.
-            $listfolders = $this->get_folders_list();
-            $listsessions = $this->get_sessions_list();
-
-            // Process folders and replace missing parent folders with root.
-            foreach ($listfolders as $folderid => $folder) {
-                if ($folder['parentfolderid'] !== self::ROOT_FOLDER_ID && !isset($listfolders[$folder['parentfolderid']])) {
-                    // Missing parent folder, set to root.
-                    $listfolders[$folderid]['parentfolderid'] = self::ROOT_FOLDER_ID;
-                }
-            }
-
-            // Process sessions and move those with missing parent folder to root.
-            $listsessionsprocessed = array(self::ROOT_FOLDER_ID => array());
-            foreach ($listsessions as $parentfolderid => $sessionsarray) {
-                if ($parentfolderid !== self::ROOT_FOLDER_ID && !isset($listfolders[$parentfolderid])) {
-                    // Missing parent folder.
-                    $listsessionsprocessed[self::ROOT_FOLDER_ID] = array_merge($listsessionsprocessed[self::ROOT_FOLDER_ID], $sessionsarray);
-                } else {
-                    $listsessionsprocessed[$parentfolderid] = $sessionsarray;
-                }
-            }
-
-            // Build the tree.
-            $listfolders = $this->build_folders_tree($listfolders, self::ROOT_FOLDER_ID, $listsessionsprocessed, self::ROOT_FOLDER_ID);
-            // Add root level sessions.
-            $listfolders = array_merge($listfolders, $listsessionsprocessed[self::ROOT_FOLDER_ID]);
-
-            // Store result in cache.
-            if (count($listfolders)) {
-                $cache->set_many(array('listfolders' => $listfolders, 'lastupdated' => time()));
-            }
-        }
+        $listfolders = array();
 
         // Split the path requested.
         $patharray = explode('/', $path);
@@ -154,11 +111,62 @@ class repository_panopto extends repository {
             } else {
                 // Getting deeper in subdirs...
                 // Add navigation path item.
+                $param = new \Panopto\SessionManagement\GetFoldersById($this->auth, array($pathitem));
+                $folders = $this->smclient->GetFoldersById($param)->getGetFoldersByIdResult();
+                // Add navigation path item.
                 $navpathitem = $navpathitem . '/' . $pathitem;
-                $navpath[] = array('name' => $listfolders[$pathitem]['title'], 'path' => $navpathitem);
-                // Reduce the tree to the requested folder.
-                $listfolders = $listfolders[$pathitem]['children'];
+                $navpath[] = array('name' => $folders[0]->getName(), 'path' => $navpathitem);
             }
+        }
+
+        if (count($patharray) === 1) {
+            // Root folder view has been requested.
+
+            // Cache setup.
+            $cache = cache::make('repository_panopto', 'folderstree');
+            if ($cache->get('lastupdated') && (time() - (int) $cache->get('lastupdated') > (int) get_config('panopto', 'folderstreecachettl'))) {
+                // Invalidate cache after timeout.
+                $cache->purge();
+            }
+
+            // Retrieve folders tree from cache, if it does not exist, build one.
+            $listrootfolders = $cache->get('listrootfolders');
+            if ($listrootfolders === false) {
+                // Process folders and replace missing parent folders with root.
+                $listfolders = $this->get_folders_list($path);
+                $listrootfolders = array();
+                foreach ($listfolders as $folder) {
+                    if ($folder['parentfolderid'] == self::ROOT_FOLDER_ID || !isset($listfolders[$folder['parentfolderid']])) {
+                        // Missing parent folder, set to root.
+                        $listrootfolders[] = $folder;
+                    }
+                }
+
+                // Process sessions and move those with missing parent folder to root.
+                $listsessions = $this->get_sessions_list($path);
+                $listrootsessions = array();
+                foreach ($listsessions as $parentfolderid => $sessionsarray) {
+                    if ($parentfolderid == self::ROOT_FOLDER_ID || !isset($listfolders[$parentfolderid])) {
+                        // Missing parent folder.
+                        $listrootsessions = array_merge($listrootsessions, $sessionsarray);
+                    }
+                }
+
+                // Mix root level folders and sessions.
+                $listrootfolders = array_merge($listrootfolders, $listrootsessions);
+
+                // Store result in cache.
+                if (count($listrootfolders)) {
+                    $cache->set_many(array('listrootfolders' => $listrootfolders, 'lastupdated' => time()));
+                }
+            }
+            $listfolders = $listrootfolders;
+        } else {
+            // When we are not in root folder, we request the actual folder content.
+            $listfolders = $this->get_folders_list($path);
+            $listsessions = $this->get_sessions_list($path);
+            $listsessions = array_shift($listsessions);
+            $listfolders = array_merge($listfolders, $listsessions);
         }
 
         // Output result.
@@ -166,36 +174,6 @@ class repository_panopto extends repository {
         $listing['list'] = $listfolders;
         $listing['path'] = $navpath;
         return $listing;
-    }
-
-    /**
-     * Converts flat list of directories with parent data into tree structure
-     * suitable for get_listing output.
-     *
-     * @param array $listfolders list of the folders to use.
-     * @param string $parent parent folder to build the list of child directires for.
-     * @param array $listsessions list of sessions to embed generated by get_sessions_list().
-     * @param string $path the current path
-     * @return array $tree directiry tree structure.
-     */
-    public function build_folders_tree($listfolders = array(), $parent = null, &$listsessions, $path) {
-        $tree = array();
-        foreach($listfolders as $folderid => $folder) {
-            if ($folder['parentfolderid'] === $parent) {
-                unset($folder['parentfolderid']);
-                unset($listfolders[$folderid]);
-                // Recurively get children folders.
-                $folder['path'] = $path . '/' . $folderid;
-                $folder['children'] = $this->build_folders_tree($listfolders, $folderid, $listsessions, $folder['path']);
-                // Check if there are sessions to add to the children list.
-                if (isset($listsessions[$folderid])) {
-                    $folder['children'] = array_merge($folder['children'], $listsessions[$folderid]);
-                    unset($listsessions[$folderid]);
-                }
-                $tree[$folderid] = $folder;
-            }
-        }
-        return $tree;
     }
 
     /**
@@ -219,12 +197,19 @@ class repository_panopto extends repository {
     }
 
     /**
-     * Get a list of Panopto directories.
+     * Given a path, get a list of Panopto directories.
      *
+     * If root path is requested, we get all possible folders instead, to build
+     * a root directory (see get_listing). There is a use case, when user was
+     * given access rights to some non-root folder in Panopto, if parent is set
+     * to root folder in the API request below on initial listing, there will
+     * be no way to retrieve this folder and display it to the user.
+     *
+     * @param string $path identifier for current path.
      * @param string $search the search query.
      * @return array list of folders with the same layout as the 'list' element in 'get_listing'.
      */
-    private function get_folders_list($search = '') {
+    private function get_folders_list($path, $search = '') {
         global $OUTPUT;
         $list = array();
 
@@ -242,6 +227,11 @@ class repository_panopto extends repository {
         // also a good idea to search by relevance.
         if (!empty($search)) {
             $request->setWildcardSearchNameOnly(true);
+        } elseif ($path !== self::ROOT_FOLDER_ID) {
+            // Set parent folder if it is not root.
+            $patharray = explode('/', $path);
+            $currentfolderid = end($patharray);
+            $request->setParentFolderId($currentfolderid);
         }
 
         $param = new \Panopto\SessionManagement\GetCreatorFoldersList($this->auth, $request, $search);
@@ -259,7 +249,7 @@ class repository_panopto extends repository {
                 $list[$folder->getId()] = array(
                     'title' => $folder->getName(),
                     'shorttitle' => $folder->getName(),
-                    'path' => '',
+                    'path' => $path . '/' . $folder->getId(),
                     'thumbnail' => $OUTPUT->image_url('f/folder-32')->out(false),
                     'children' => array(),
                     // Techical data we need to build directory tree.
@@ -276,10 +266,11 @@ class repository_panopto extends repository {
      * List of files with the same layout as the 'list' element in 'get_listing',
      * but with parent directory data. Basically array of arrays with key set to parent directory.
      *
+     * @param string $path identifier for current path.
      * @param string $search the search query.
-     * @return array $list list of arrays of files.
+     * @return array list of files with the same layout as the 'list' element in 'get_listing'.
      */
-    private function get_sessions_list($search = '') {
+    private function get_sessions_list($path, $search = '') {
         $list = array();
 
         // Build the GetFoldersList request and perform the call.
@@ -292,6 +283,15 @@ class repository_panopto extends repository {
         $request->setSortBy('Name');
         $request->setSortIncreasing(true);
         $request->setStates(array('Complete'));
+
+        // If we are not searching, set parent folder if it is not root.
+        if (empty($search) && $path !== self::ROOT_FOLDER_ID) {
+            $patharray = explode('/', $path);
+            $currentfolderid = end($patharray);
+            $request->setFolderId($currentfolderid);
+            // Pre-define array for the current parent folder.
+            $list[$currentfolderid] = array();
+        }
 
         $param = new \Panopto\SessionManagement\GetSessionsList($this->auth, $request, $search);
         $sessions = $this->smclient->GetSessionsList($param)->getGetSessionsListResult();
