@@ -165,8 +165,8 @@ class repository_panopto extends repository {
             // When we are not in root folder, we request the actual folder content.
             $listfolders = $this->get_folders_list($path);
             $listsessions = $this->get_sessions_list($path);
-            $listsessions = array_shift($listsessions);
-            $listfolders = array_merge($listfolders, $listsessions);
+            $currentfolderid = end($patharray);
+            $listfolders = array_merge($listfolders, $listsessions[$currentfolderid]);
         }
 
         // Output result.
@@ -185,8 +185,8 @@ class repository_panopto extends repository {
     public function search($key, $page = 0) {
         // Data preparation.
         // Get the folders and sessions list for the current path.
-        $listfolders = $this->get_folders_list($key);
-        $listsessions = $this->get_sessions_list($key);
+        $listfolders = $this->get_folders_list(self::ROOT_FOLDER_ID, $key);
+        $listsessions = $this->get_sessions_list(self::ROOT_FOLDER_ID, $key);
         $list = array_merge($listfolders, $listsessions[self::ROOT_FOLDER_ID]);
 
         // Output result.
