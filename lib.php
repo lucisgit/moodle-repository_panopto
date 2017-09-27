@@ -285,7 +285,8 @@ class repository_panopto extends repository {
         $request->setStates(array('Complete'));
 
         // If we are not searching, set parent folder if it is not root.
-        if (empty($search) && $path !== self::ROOT_FOLDER_ID) {
+        //if (empty($search) && $path !== self::ROOT_FOLDER_ID) { // exclude orphaned for now.
+        if (empty($search)) {
             $patharray = explode('/', $path);
             $currentfolderid = end($patharray);
             $request->setFolderId($currentfolderid);
