@@ -284,9 +284,9 @@ class repository_panopto extends repository {
         $request->setSortIncreasing(true);
         $request->setStates(array('Complete'));
 
-        // If we are not searching, set parent folder if it is not root.
-        //if (empty($search) && $path !== self::ROOT_FOLDER_ID) { // exclude orphaned for now.
-        if (empty($search)) {
+        // If we are not searching, set parent folder if required.
+        $orphanedlistingcheck = get_config('panopto', 'showorphanedsessions') ? ($path !== self::ROOT_FOLDER_ID) : true;
+        if (empty($search) && $orphanedlistingcheck) {
             $patharray = explode('/', $path);
             $currentfolderid = end($patharray);
             $request->setFolderId($currentfolderid);
@@ -347,7 +347,7 @@ class repository_panopto extends repository {
      * @return array of option names.
      */
     public static function get_type_option_names() {
-        return array('serverhostname', 'userkey', 'password', 'instancename', 'applicationkey', 'pluginname', 'folderstreecachettl');
+        return array('serverhostname', 'userkey', 'password', 'instancename', 'applicationkey', 'pluginname', 'folderstreecachettl', 'showorphanedsessions');
     }
 
     /**
@@ -369,6 +369,12 @@ class repository_panopto extends repository {
         $mform->setType('folderstreecachettl', PARAM_INT);
         $mform->setDefault('folderstreecachettl', 300);
         $mform->addElement('static', 'folderstreecachettldesc', '', get_string('folderstreecachettldesc', 'repository_panopto'));
+
+        // Show orphaned sessions.
+        $mform->addElement('checkbox', 'showorphanedsessions', get_string('showorphanedsessions', 'repository_panopto'));
+        $mform->setType('showorphanedsessions', PARAM_BOOL);
+        $mform->setDefault('showorphanedsessions', false);
+        $mform->addElement('static', 'showorphanedsessionsdesc', '', get_string('showorphanedsessionsdesc', 'repository_panopto'));
 
         // Header.
         $mform->addElement('header', 'connectionsettings', get_string('connectionsettings', 'repository_panopto'));
