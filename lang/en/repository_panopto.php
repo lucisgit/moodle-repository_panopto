@@ -27,7 +27,7 @@
 $string['applicationkey'] = 'Identitiy Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
 $string['bouncepageurl'] = 'Bounce Page URL';
-$string['bouncepageurldesc'] = 'In the Panopto Identity Providers settings, set Bounce Page URL to {$a} in order to enable SSO.';
+$string['bouncepageurldesc'] = 'In the Panopto Identity Providers Instance settings, set Bounce Page URL to {$a} in order to enable SSO.';
 $string['bouncepageurlnotreadydesc'] = 'Visit this page after saving plugin configuration to look up Bounce Page URL you need to use in Panopto Identity Providers settings.';
 $string['cachedef_folderstree'] = 'Panopto folders tree for the user.';
 $string['configplugin'] = 'Panopto configuration';
@@ -45,7 +45,7 @@ $string['panopto:view'] = 'View Panopto repository';
 $string['password'] = 'Panopto API user password';
 $string['passworddesc'] = 'Password for API user authentication.';
 $string['pluginname'] = 'Panopto';
-$string['pluginnotice'] = 'Notice, this repository plugin is designed to work with Panopto Activity module only. Please make sure you have mod_panopto installed. This repositiry can\'t be used outside mod_panopto at the moment.';
+$string['pluginnotice'] = 'Notice, this repository plugin is designed to work with <a href="https://github.com/lucisgit/moodle-mod_panopto">Panopto Activity module</a> only. Please make sure you have mod_panopto installed. This repositiry can\'t be used outside mod_panopto at the moment.';
 $string['serverhostname'] = 'Panopto server hostname';
 $string['serverhostnamedesc'] = 'FQDN of your Panopto server, e.g. \'demo.hosted.panopto.com\'.';
 $string['showorphanedsessions'] = 'Show orphaned sessions';
