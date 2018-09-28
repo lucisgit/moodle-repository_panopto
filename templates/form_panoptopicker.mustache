@@ -39,7 +39,7 @@
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}created, repository_panopto{{/str}}</label><span>{{created}}</span></div>
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}duration, repository_panopto{{/str}}</label><span>{{duration}}</span></div>
         <div><label class="panoptopicker-area-title dimmed_text">{{#str}}viewerurl, repository_panopto{{/str}}</label><span><a href="{{viewerurl}}">{{#str}}viewonpanopto, repository_panopto{{/str}}</a></span></div>
-        <img class="panoptopicker-area-thumbnail" src="{{thumburl}}" />
+        <img class="panoptopicker-area-thumbnail" alt="{{#str}}videothumbnail, repository_panopto{{/str}}" src="{{thumburl}}" />
     {{/name}}
     {{^name}}
         <div><span id="id_error_name" class="error" tabindex="0">{{#str}}errorsessionnotfound, repository_panopto{{/str}}</span></div>

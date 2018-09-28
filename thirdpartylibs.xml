@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<libraries>
+    <library>
+        <location>lib/panopto</location>
+        <name>PHP Panopto API client and libraries</name>
+        <license>GPL</license>
+        <version>v1.0.3+5.3.0.35915</version>
+        <licenseversion>3.0+</licenseversion>
+    </library>
+</libraries>

@@ -10,10 +10,10 @@ M.form_panoptopicker.init = function(Y, options) {
     Y.on('click', function(e, client_id) {
         e.preventDefault();
         M.core_filepicker.instances[client_id].show();
-    }, '#filepicker-button-js-'+options.client_id, null, options.client_id);
+    }, '#filepicker-button-js-' + options.client_id, null, options.client_id);
 };
 
-M.form_panoptopicker.callback = function (params) {
+M.form_panoptopicker.callback = function(params) {
     // Set value.
     Y.one('#' + M.form_panoptopicker.elements[params.client_id]).set('value', params.url);
     // Trigger change so that we can trace it in amd.

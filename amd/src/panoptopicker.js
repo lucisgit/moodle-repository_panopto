@@ -32,7 +32,7 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification', 'core/url'
             addSpinner($('#panoptopicker-area'));
             var promises = ajax.call([{
                 methodname: 'repository_panopto_get_session_by_id',
-                args: { sessionid: event.target.value, contextid: contextid },
+                args: {sessionid: event.target.value, contextid: contextid},
             }]);
             promises[0].done(function(response) {
                 renderSessionInfo(response);
@@ -70,17 +70,16 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification', 'core/url'
     };
 
     return /** @alias module:repository_panopto/panoptopicker */ {
+
         /**
          * Initialise filepicker.
          *
          * @method init
          * @param {Array} options.
          */
-        init: function (options) {
+        init: function(options) {
             contextid = options.contextid;
-            $('#'+options.elementid).on('change', onChangeSessionId).trigger('change');
+            $('#' + options.elementid).on('change', onChangeSessionId).trigger('change');
         }
     };
 });
-
-

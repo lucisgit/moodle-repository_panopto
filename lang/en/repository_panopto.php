@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -53,4 +52,5 @@ $string['showorphanedsessionsdesc'] = 'If ticked, Panopto repository root direct
 $string['title'] = 'Title';
 $string['userkey'] = 'Panopto API username';
 $string['userkeydesc'] = 'User on the Panopto server to use for API calls, it needs to have Administrator rights.';
+$string['videothumbnail'] = 'Video thumbnail';
 $string['viewonpanopto'] = 'View this video on Panopto';
