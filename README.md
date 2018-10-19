@@ -10,6 +10,8 @@ for communication with Panopto server, not only for purposes of directory
 listing that plugin provides, but for other queries Panopto resource module
 needs to make.
 
+<img src="https://moodle.org/pluginfile.php/50/local_plugins/plugin_screenshots/2152/panopto_pick_video.png" width="600px"/>
+
 Please read [Panopto resource
 module](https://github.com/lucisgit/moodle-mod_panopto) documentation for
 details on this resource module and unique functionality features it
