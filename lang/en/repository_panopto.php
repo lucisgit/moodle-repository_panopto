@@ -23,9 +23,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['applicationkey'] = 'Identitiy Provider Application Key';
+$string['applicationkey'] = 'Identity Provider Application Key';
 $string['applicationkeydesc'] = 'Application Key from Panopto Identity Providers settings, e.g. \'00000000-0000-0000-0000-000000000000\'.';
-$string['bouncepageurl'] = 'Bounce Page URL';
+$string['bouncepageurl'] = 'Bounce page URL';
 $string['bouncepageurldesc'] = 'In the Panopto Identity Providers Instance settings, set Bounce Page URL to {$a} in order to enable SSO.';
 $string['bouncepageurlnotreadydesc'] = 'Visit this page after saving plugin configuration to look up Bounce Page URL you need to use in Panopto Identity Providers settings.';
 $string['cachedef_folderstree'] = 'Panopto folders tree for the user.';
@@ -37,7 +37,7 @@ $string['errorsessionnotfound'] = 'This session is not found on Panopto. It migh
 $string['errornosessionaccess'] = 'You do not have access rights to this session, this activity might have been added by the different staff member who has access to this video. You still can choose a different video and save, but you won\'t be able to revert to this one after that.';
 $string['folderstreecachettl'] = 'Folders tree cache TTL';
 $string['folderstreecachettldesc'] = 'Set duration in seconds when folders tree cache will be valid (300 seconds by default). This speeds up folders navigation in repository interface, but changes made remotely on Panopto (e.g. new folder created) will be reflected in the interface when local cache has expired. Setting to 0 will disable folders tree cache.';
-$string['instancename'] = 'Identitiy Provider Instance Name';
+$string['instancename'] = 'Identity Provider Instance Name';
 $string['instancenamedesc'] = 'Instance name from Panopto Identity Providers settings.';
 $string['viewerurl'] = 'URL';
 $string['panopto:view'] = 'View Panopto repository';
