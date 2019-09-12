@@ -1,0 +1,15 @@
+PHP Panopto API client and libraries
+------------------------------------
+
+This is PHP implementation of Panopto v4.6 API. It contains client class for
+accessing Panopto API public webservices and corresponding libarary classes
+for performing the API calls.
+
+Retreived from: https://github.com/lucisgit/php-panopto-api
+License: GPLv3
+
+Files located at ./lib/Panopto/PublicAPI/4.6 are automatically generated using
+tool called wsdl2phpgenerator, which is producing PHP classes using Panopto
+WSDL endpoints as data source. Refer to library repo for more details and
+instruction on usage.
+
