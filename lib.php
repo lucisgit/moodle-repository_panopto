@@ -123,7 +123,8 @@ class repository_panopto extends repository {
 
             // Cache setup.
             $cache = cache::make('repository_panopto', 'folderstree');
-            if ($cache->get('lastupdated') && (time() - (int) $cache->get('lastupdated') > (int) get_config('panopto', 'folderstreecachettl'))) {
+            $cachettl = get_config('panopto', 'folderstreecachettl');
+            if ($cache->get('lastupdated') && (time() - (int) $cache->get('lastupdated') > (int) $cachettl)) {
                 // Invalidate cache after timeout.
                 $cache->purge();
             }
@@ -226,7 +227,7 @@ class repository_panopto extends repository {
         // also a good idea to search by relevance.
         if (!empty($search)) {
             $request->setWildcardSearchNameOnly(true);
-        } elseif ($path !== self::ROOT_FOLDER_ID) {
+        } else if ($path !== self::ROOT_FOLDER_ID) {
             // Set parent folder if it is not root.
             $patharray = explode('/', $path);
             $currentfolderid = end($patharray);
@@ -346,7 +347,16 @@ class repository_panopto extends repository {
      * @return array of option names.
      */
     public static function get_type_option_names() {
-        return array('serverhostname', 'userkey', 'password', 'instancename', 'applicationkey', 'pluginname', 'folderstreecachettl', 'showorphanedsessions');
+        return array(
+            'serverhostname',
+            'userkey',
+            'password',
+            'instancename',
+            'applicationkey',
+            'pluginname',
+            'folderstreecachettl',
+            'showorphanedsessions',
+        );
     }
 
     /**
@@ -359,7 +369,8 @@ class repository_panopto extends repository {
         global $DB;
 
         // Notice about repo availability.
-        $mform->addElement('static', 'pluginnotice', '', html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), array('class' => 'warning')));
+        $mform->addElement('static', 'pluginnotice', '',
+            html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), array('class' => 'warning')));
         $strrequired = get_string('required');
         parent::type_config_form($mform);
 
@@ -410,12 +421,14 @@ class repository_panopto extends repository {
 
         // Display Bounce Page URL for Identity Privder setup.
         $sql = 'SELECT i.id FROM {repository} r, {repository_instances} i WHERE r.type=? AND i.typeid=r.id';
-        $repo_id = $DB->get_field_sql($sql, array('panopto'));
-        if ($repo_id) {
-            $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $repo_id));
-            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
+        $repoid = $DB->get_field_sql($sql, array('panopto'));
+        if ($repoid) {
+            $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $repoid));
+            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'),
+                get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
         } else {
-            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'), get_string('bouncepageurlnotreadydesc', 'repository_panopto'));
+            $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'),
+                get_string('bouncepageurlnotreadydesc', 'repository_panopto'));
         }
     }
 
@@ -451,7 +464,7 @@ class repository_panopto extends repository {
      *
      * @return true.
      */
-    public function check_login(){
+    public function check_login() {
         $this->sync_user();
         return true;
     }
@@ -463,18 +476,20 @@ class repository_panopto extends repository {
      *
      * @return void.
      */
-    private function sync_user(){
+    private function sync_user() {
         global $USER;
         // Check that external user exists, if not, sync user data.
         $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
         $user = $this->umclient->GetUserByKey($params)->getGetUserByKeyResult();
         if ($user === null) {
             // User does not exist, sync one.
-            $params = new \Panopto\UserManagement\SyncExternalUser($this->auth, $USER->firstname, $USER->lastname, $USER->email, false, array());
+            $params = new \Panopto\UserManagement\SyncExternalUser($this->auth, $USER->firstname,
+                $USER->lastname, $USER->email, false, array());
             $this->umclient->SyncExternalUser($params);
-        } elseif (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
+        } else if (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
             // User exists, but some data is missing, update contact info.
-            $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
+            $params = new \Panopto\UserManagement\UpdateContactInfo($this->auth, $user->getUserId(), $USER->firstname,
+                $USER->lastname, $USER->email, false);
             $this->umclient->UpdateContactInfo($params);
         }
     }

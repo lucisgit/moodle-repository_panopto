@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 $functions = array(
         'repository_panopto_get_session_by_id' => array(
             'classname'     => 'repository_panopto_external',

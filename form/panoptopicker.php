@@ -23,6 +23,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+defined('MOODLE_INTERNAL') || die();
+
 require_once("HTML/QuickForm/input.php");
 
 /**
@@ -34,11 +36,16 @@ require_once("HTML/QuickForm/input.php");
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
-    /** @var string html for help button, if empty then no help */
-    var $_helpbutton='';
 
-    /** @var bool if true label will be hidden */
-    var $_hiddenLabel=false;
+    /**
+     * @var string html for help button, if empty then no help
+     */
+    public $_helpbutton = '';
+
+    /**
+     * @var bool if true label will be hidden
+     */
+    protected $_hiddenLabel = false;
 
     /**
      * Constructor
@@ -48,11 +55,11 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
      * @param mixed $attributes Either a typical HTML attribute string or an associative array.
      * @param array $options data which need to be posted.
      */
-    public function __construct($elementName=null, $elementLabel=null, $attributes=null, $options=null) {
+    public function __construct($elementName = null, $elementLabel = null, $attributes = null, $options = null) {
         global $CFG;
         require_once("$CFG->dirroot/repository/lib.php");
         $options = (array)$options;
-        foreach ($options as $name=>$value) {
+        foreach ($options as $name => $value) {
             $this->_options[$name] = $value;
         }
         parent::__construct($elementName, $elementLabel, $attributes);
@@ -73,7 +80,7 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
      *
      * @param bool $hiddenLabel sets if label should be hidden
      */
-    function setHiddenLabel($hiddenLabel){
+    public function setHiddenLabel($hiddenLabel) {
         $this->_hiddenLabel = $hiddenLabel;
     }
 
@@ -82,14 +89,14 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
      *
      * @return string
      */
-    function toHtml(){
+    public function toHtml() {
         global $PAGE, $OUTPUT;
 
         $str = '';
         if ($this->_hiddenLabel) {
             $this->_generateId();
             $str = '<label class="accesshide" for="'.$this->getAttribute('id').'" >'.
-                    $this->getLabel().'</label>';
+                $this->getLabel().'</label>';
         }
 
         // Initialise filepicker.
@@ -133,7 +140,7 @@ EOD;
         // will get into amd in the core first. Passing $options to amd seems
         // problematic as it contains objects.
         $options->element_id = $this->getAttribute('id');
-        $module = array('name'=>'form_panoptopicker', 'fullpath'=>'/repository/panopto/form/panoptopicker.js', 'requires'=>array('core_filepicker'));
+        $module = array('name' => 'form_panoptopicker', 'fullpath' => '/repository/panopto/form/panoptopicker.js', 'requires' => array('core_filepicker'));
         $PAGE->requires->js_init_call('M.form_panoptopicker.init', array($options), true, $module);
 
         // Initialise JS amd that performs AJAX calls to retrieve session data using Panopto API on backend.
@@ -147,11 +154,11 @@ EOD;
     }
 
     /**
-     * get html for help button
+     * Get html for help button
      *
      * @return string html for help button
      */
-    function getHelpButton(){
+    public function getHelpButton() {
         return $this->_helpbutton;
     }
 
@@ -162,7 +169,7 @@ EOD;
      *
      * @return string
      */
-    function getElementTemplateType(){
+    public function getElementTemplateType() {
         if ($this->_flagFrozen){
             return 'static';
         } else {
@@ -172,4 +179,4 @@ EOD;
 }
 
 MoodleQuickForm::registerElementType('panoptopicker', $CFG->dirroot.'/repository/panopto/form/panoptopicker.php',
-        'MoodleQuickForm_panoptopicker');
+    'MoodleQuickForm_panoptopicker');
