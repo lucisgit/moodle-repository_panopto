@@ -410,13 +410,13 @@ class repository_panopto extends repository {
         // Instance name.
         $mform->addElement('text', 'instancename', get_string('instancename', 'repository_panopto'));
         $mform->addRule('instancename', $strrequired, 'required', null, 'client');
-        $mform->setType('instancename', PARAM_RAW_TRIMMED);
+        $mform->setType('instancename', PARAM_ALPHANUMEXT);
         $mform->addElement('static', 'instancenamedesc', '', get_string('instancenamedesc', 'repository_panopto'));
 
         // Application key.
         $mform->addElement('text', 'applicationkey', get_string('applicationkey', 'repository_panopto'));
         $mform->addRule('applicationkey', $strrequired, 'required', null, 'client');
-        $mform->setType('applicationkey', PARAM_RAW_TRIMMED);
+        $mform->setType('applicationkey', PARAM_ALPHANUMEXT);
         $mform->addElement('static', 'applicationkeydesc', '', get_string('applicationkeydesc', 'repository_panopto'));
 
         // Display Bounce Page URL for Identity Privder setup.
