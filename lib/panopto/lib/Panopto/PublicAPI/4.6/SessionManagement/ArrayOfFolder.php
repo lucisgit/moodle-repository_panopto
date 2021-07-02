@@ -8,7 +8,7 @@ class ArrayOfFolder implements \ArrayAccess, \Iterator, \Countable
     /**
      * @var Folder[] $Folder
      */
-    protected $Folder = null;
+    protected $Folder = [];
 
     
     public function __construct()
@@ -138,7 +138,7 @@ class ArrayOfFolder implements \ArrayAccess, \Iterator, \Countable
     /**
      * Countable implementation
      *
-     * @return Folder Return count of elements
+     * @return int Return count of elements
      */
     public function count()
     {
