@@ -100,18 +100,18 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
         }
 
         // Initialise filepicker.
-        $client_id = uniqid();
+        $clientid = uniqid();
         $args = new stdClass();
         $args->return_types = FILE_EXTERNAL;
         $args->context = $PAGE->context;
-        $args->client_id = $client_id;
+        $args->client_id = $clientid;
         $args->env = 'panoptopicker';
         $fp = new file_picker($args);
 
         // Override repositories list and make Panopto repository the only listed.
         $fp->options->repositories = array();
         $repositories = repository::get_instances(array(
-            'currentcontext'=> $PAGE->context,
+            'currentcontext' => $PAGE->context,
             'type' => 'panopto',
             'onlyvisible' => false,
         ));
@@ -121,11 +121,12 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
         }
 
         $options = $fp->options;
-        $str .= '<input type="hidden" name="'.$this->getName().'" id="'.$this->getAttribute('id').'" value="'.$this->getValue().'" />';
+        $str .= '<input type="hidden" name="' . $this->getName() . '" id="' . $this->getAttribute('id') . '" value="' .
+                $this->getValue() . '" />';
         if (count($options->repositories) > 0) {
             $straddlink = get_string('chooseavideo', 'panopto');
             $str .= <<<EOD
-<button id="filepicker-button-js-{$client_id}" class="visibleifjs panoptopicker-button">
+<button id="filepicker-button-js-{$clientid}" class="visibleifjs panoptopicker-button">
 $straddlink
 </button>
 <div class="repository_panopto" id="panoptopicker-area"></div>
@@ -140,7 +141,10 @@ EOD;
         // will get into amd in the core first. Passing $options to amd seems
         // problematic as it contains objects.
         $options->element_id = $this->getAttribute('id');
-        $module = array('name' => 'form_panoptopicker', 'fullpath' => '/repository/panopto/form/panoptopicker.js', 'requires' => array('core_filepicker'));
+        $module = array('name' => 'form_panoptopicker',
+            'fullpath' => '/repository/panopto/form/panoptopicker.js',
+            'requires' => array('core_filepicker')
+        );
         $PAGE->requires->js_init_call('M.form_panoptopicker.init', array($options), true, $module);
 
         // Initialise JS amd that performs AJAX calls to retrieve session data using Panopto API on backend.
@@ -170,7 +174,7 @@ EOD;
      * @return string
      */
     public function getElementTemplateType() {
-        if ($this->_flagFrozen){
+        if ($this->_flagFrozen) {
             return 'static';
         } else {
             return 'default';
@@ -179,4 +183,4 @@ EOD;
 }
 
 MoodleQuickForm::registerElementType('panoptopicker', $CFG->dirroot.'/repository/panopto/form/panoptopicker.php',
-    'MoodleQuickForm_panoptopicker');
+        'MoodleQuickForm_panoptopicker');

@@ -479,7 +479,8 @@ class repository_panopto extends repository {
     private function sync_user() {
         global $USER;
         // Check that external user exists, if not, sync user data.
-        $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' . $USER->username);
+        $params = new \Panopto\UserManagement\GetUserByKey($this->auth, get_config('panopto', 'instancename') . '\\' .
+                $USER->username);
         $user = $this->umclient->GetUserByKey($params)->getGetUserByKeyResult();
         if ($user === null) {
             // User does not exist, sync one.

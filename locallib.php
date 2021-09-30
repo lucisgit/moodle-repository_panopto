@@ -77,7 +77,7 @@ class repository_panopto_interface {
      * @param string $userkey User on the server to use for API calls. If used with Application Key from Identity Provider,
      *                        user needs to be prepended with corresponding Instance Name, e.g. 'MyInstanceName\someuser'.
      * @param string $password Password for user authentication (not required if $applicationkey is specified).
-     * @param string $applicationkey Application Key value from Identity Provider setting, e.g. '00000000-0000-0000-0000-000000000000'
+     * @param string $applicationkey Application Key from Identity Provider setting, e.g. '00000000-0000-0000-0000-000000000000'
      *
      */
     public function set_authentication_info($userkey = '', $password = '', $applicationkey = '') {
