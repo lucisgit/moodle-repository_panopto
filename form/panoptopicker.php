@@ -35,7 +35,7 @@ require_once("HTML/QuickForm/input.php");
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input{
+class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input {
 
     /**
      * @var string html for help button, if empty then no help
