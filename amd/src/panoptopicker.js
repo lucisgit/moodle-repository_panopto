@@ -17,7 +17,6 @@
  * Functionality for the form element panoptopicker
  *
  * @module     repository_panopto/panoptopicker
- * @package    repository_panopto
  * @copyright  2017 Lancaster University (http://www.lancaster.ac.uk/)
  * @author     Ruslan Kabalin (https://github.com/kabalin)
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -75,7 +74,7 @@ define(['jquery', 'core/ajax', 'core/templates', 'core/notification', 'core/url'
          * Initialise filepicker.
          *
          * @method init
-         * @param {Array} options.
+         * @param {array} options
          */
         init: function(options) {
             contextid = options.contextid;
