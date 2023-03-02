@@ -58,7 +58,7 @@ class repository_panopto_interface {
      * Constructor for the panopto interface.
      */
     public function __construct() {
-        $this->panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
+        $this->panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'));
         $this->authclient = $this->panoptoclient->Auth();
         $this->smclient = $this->panoptoclient->SessionManagement();
         $this->umclient = $this->panoptoclient->UserManagement();

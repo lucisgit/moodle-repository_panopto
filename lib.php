@@ -68,7 +68,7 @@ class repository_panopto extends repository {
         $this->disabled = true;
 
         // Instantiate Panopto client.
-        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'), array('keep_alive' => 0));
+        $panoptoclient = new \Panopto\Client(get_config('panopto', 'serverhostname'));
         $panoptoclient->setAuthenticationInfo(get_config('panopto', 'userkey'), get_config('panopto', 'password'));
         $this->adminauth = $panoptoclient->getAuthenticationInfo();
         $panoptoclient->setAuthenticationInfo(
@@ -78,8 +78,7 @@ class repository_panopto extends repository {
             $this->smclient = $panoptoclient->SessionManagement();
             $this->umclient = $panoptoclient->UserManagement();
         } catch (Exception $e) {
-            // TODO: Flag this somehow, most likely there is settings issue or
-            // server is not available.
+            // TODO: Flag this somehow, most likely there is settings issue or server is not available.
         }
     }
 
