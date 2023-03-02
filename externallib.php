@@ -113,13 +113,13 @@ class repository_panopto_external extends external_api {
             array(
                 'session' => new external_single_structure(
                     array(
-                        'id'                => new external_value(PARAM_TEXT, 'session id'),
-                        'name'              => new external_value(PARAM_TEXT, 'session name'),
-                        'created'           => new external_value(PARAM_TEXT, 'session created timestamp'),
-                        'duration'          => new external_value(PARAM_TEXT, 'session duration'),
-                        'viewerurl'         => new external_value(PARAM_TEXT, 'session viewer url'),
-                        'thumburl'          => new external_value(PARAM_URL, 'session thumb url'),
-                        'canaccess'         => new external_value(PARAM_BOOL, 'session access flag'),
+                        'id' => new external_value(PARAM_TEXT, 'session id'),
+                        'name' => new external_value(PARAM_TEXT, 'session name'),
+                        'created' => new external_value(PARAM_TEXT, 'session created timestamp'),
+                        'duration' => new external_value(PARAM_TEXT, 'session duration'),
+                        'viewerurl' => new external_value(PARAM_TEXT, 'session viewer url'),
+                        'thumburl' => new external_value(PARAM_URL, 'session thumb url'),
+                        'canaccess' => new external_value(PARAM_BOOL, 'session access flag'),
                     ), 'session data', VALUE_OPTIONAL),
             )
         );

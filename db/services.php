@@ -25,14 +25,14 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$functions = array(
-        'repository_panopto_get_session_by_id' => array(
-            'classname'     => 'repository_panopto_external',
-            'methodname'    => 'get_session_by_id',
-            'classpath'     => 'repository/panopto/externallib.php',
-            'description'   => 'Get Panopto session by id using API query.',
-            'type'          => 'read',
-            'capabilities'  => 'repository/panopto:view',
-            'ajax'          => true,
-        ),
-);
+$functions = [
+    'repository_panopto_get_session_by_id' => [
+        'classname' => 'repository_panopto_external',
+        'methodname' => 'get_session_by_id',
+        'classpath' => 'repository/panopto/externallib.php',
+        'description' => 'Get Panopto session by id using API query.',
+        'type' => 'read',
+        'capabilities' => 'repository/panopto:view',
+        'ajax' => true,
+    ],
+];
