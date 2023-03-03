@@ -311,13 +311,12 @@ class repository_panopto extends repository {
                 // Add session data.
                 $title = $session->getName();
                 $url = new moodle_url($session->getViewerUrl());
-                $thumburl = new moodle_url('https://' . get_config('panopto', 'serverhostname') . $session->getThumbUrl());
                 $list[$parentfolderid][] = array(
                     'shorttitle' => $title,
                     'title' => $title,
                     'source' => $session->getId(),
                     'url' => $url->out(false),
-                    'thumbnail' => $thumburl->out(false),
+                    'thumbnail' => $session->getThumbUrl(),
                     'thumbnail_title' => $session->getDescription(),
                     'date' => $session->getStartTime()->format('U'),
                 );
