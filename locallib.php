@@ -140,8 +140,12 @@ class repository_panopto_interface {
      * @return void.
      */
     public function delete_group($groupid) {
-        $param = new \Panopto\UserManagement\DeleteGroup($this->adminauth, $groupid);
-        $this->umclient->DeleteGroup($param);
+        try {
+            $param = new \Panopto\UserManagement\DeleteGroup($this->adminauth, $groupid);
+            $this->umclient->DeleteGroup($param);
+        } catch (SoapFault $exception) {
+            debugging("Caught exception deleting external Panopto group {$groupid}: " . $exception->getMessage());
+        }
     }
 
     /**
