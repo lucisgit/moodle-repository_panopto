@@ -8,7 +8,7 @@ class Auth extends \SoapClient
     /**
      * @var array $classmap The defined classes
      */
-    private static $classmap = array (
+    private static array $classmap = array (
       'AuthenticationInfo' => 'Panopto\\Auth\\AuthenticationInfo',
       'LogOnWithPassword' => 'Panopto\\Auth\\LogOnWithPassword',
       'LogOnWithPasswordResponse' => 'Panopto\\Auth\\LogOnWithPasswordResponse',
@@ -18,6 +18,8 @@ class Auth extends \SoapClient
       'GetServerVersionResponse' => 'Panopto\\Auth\\GetServerVersionResponse',
       'GetAuthenticatedUrl' => 'Panopto\\Auth\\GetAuthenticatedUrl',
       'GetAuthenticatedUrlResponse' => 'Panopto\\Auth\\GetAuthenticatedUrlResponse',
+      'ReportIntegrationInfo' => 'Panopto\\Auth\\ReportIntegrationInfo',
+      'ReportIntegrationInfoResponse' => 'Panopto\\Auth\\ReportIntegrationInfoResponse',
     );
 
     /**
@@ -44,7 +46,7 @@ class Auth extends \SoapClient
      * @param LogOnWithPassword $parameters
      * @return LogOnWithPasswordResponse
      */
-    public function LogOnWithPassword(LogOnWithPassword $parameters)
+    public function LogOnWithPassword(LogOnWithPassword $parameters): LogOnWithPasswordResponse
     {
       return $this->__soapCall('LogOnWithPassword', array($parameters));
     }
@@ -53,7 +55,7 @@ class Auth extends \SoapClient
      * @param LogOnWithExternalProvider $parameters
      * @return LogOnWithExternalProviderResponse
      */
-    public function LogOnWithExternalProvider(LogOnWithExternalProvider $parameters)
+    public function LogOnWithExternalProvider(LogOnWithExternalProvider $parameters): LogOnWithExternalProviderResponse
     {
       return $this->__soapCall('LogOnWithExternalProvider', array($parameters));
     }
@@ -62,7 +64,7 @@ class Auth extends \SoapClient
      * @param GetServerVersion $parameters
      * @return GetServerVersionResponse
      */
-    public function GetServerVersion(GetServerVersion $parameters)
+    public function GetServerVersion(GetServerVersion $parameters): GetServerVersionResponse
     {
       return $this->__soapCall('GetServerVersion', array($parameters));
     }
@@ -71,9 +73,18 @@ class Auth extends \SoapClient
      * @param GetAuthenticatedUrl $parameters
      * @return GetAuthenticatedUrlResponse
      */
-    public function GetAuthenticatedUrl(GetAuthenticatedUrl $parameters)
+    public function GetAuthenticatedUrl(GetAuthenticatedUrl $parameters): GetAuthenticatedUrlResponse
     {
       return $this->__soapCall('GetAuthenticatedUrl', array($parameters));
+    }
+
+    /**
+     * @param ReportIntegrationInfo $parameters
+     * @return ReportIntegrationInfoResponse
+     */
+    public function ReportIntegrationInfo(ReportIntegrationInfo $parameters): ReportIntegrationInfoResponse
+    {
+      return $this->__soapCall('ReportIntegrationInfo', array($parameters));
     }
 
 }

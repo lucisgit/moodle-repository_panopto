@@ -6,12 +6,12 @@ class ListFoldersResponse
 {
 
     /**
-     * @var ArrayOfFolder $Results
+     * @var ArrayOfFolder|null $Results
      */
     protected $Results = null;
 
     /**
-     * @var int $TotalNumberResults
+     * @var int|null $TotalNumberResults
      */
     protected $TotalNumberResults = null;
 
@@ -26,17 +26,17 @@ class ListFoldersResponse
      */
     public function getResults()
     {
-      return $this->Results;
+        return $this->Results;
     }
 
     /**
      * @param ArrayOfFolder $Results
-     * @return \Panopto\SessionManagement\ListFoldersResponse
+     * @return ListFoldersResponse
      */
-    public function setResults($Results)
+    public function setResults($Results): ListFoldersResponse
     {
-      $this->Results = $Results;
-      return $this;
+        $this->Results = $Results;
+        return $this;
     }
 
     /**
@@ -44,17 +44,17 @@ class ListFoldersResponse
      */
     public function getTotalNumberResults()
     {
-      return $this->TotalNumberResults;
+        return $this->TotalNumberResults;
     }
 
     /**
      * @param int $TotalNumberResults
-     * @return \Panopto\SessionManagement\ListFoldersResponse
+     * @return ListFoldersResponse
      */
-    public function setTotalNumberResults($TotalNumberResults)
+    public function setTotalNumberResults($TotalNumberResults): ListFoldersResponse
     {
-      $this->TotalNumberResults = $TotalNumberResults;
-      return $this;
+        $this->TotalNumberResults = $TotalNumberResults;
+        return $this;
     }
 
 }

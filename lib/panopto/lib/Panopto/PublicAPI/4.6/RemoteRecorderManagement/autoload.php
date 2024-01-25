@@ -1,7 +1,7 @@
 <?php
 
 
- function autoload_245e14180df06cf455e7e671ed387763($class)
+ function autoload_245e14180df06cf455e7e671ed387763($class): void
 {
     $classes = array(
         'Panopto\RemoteRecorderManagement\RemoteRecorderManagement' => __DIR__ .'/RemoteRecorderManagement.php',
@@ -36,11 +36,17 @@
         'Panopto\RemoteRecorderManagement\ScheduleRecurringRecording' => __DIR__ .'/ScheduleRecurringRecording.php',
         'Panopto\RemoteRecorderManagement\ScheduleRecurringRecordingResponse' => __DIR__ .'/ScheduleRecurringRecordingResponse.php',
         'Panopto\RemoteRecorderManagement\UpdateRecordingTime' => __DIR__ .'/UpdateRecordingTime.php',
-        'Panopto\RemoteRecorderManagement\UpdateRecordingTimeResponse' => __DIR__ .'/UpdateRecordingTimeResponse.php'
+        'Panopto\RemoteRecorderManagement\UpdateRecordingTimeResponse' => __DIR__ .'/UpdateRecordingTimeResponse.php',
+        'Panopto\RemoteRecorderManagement\UpdateRecordingSettings' => __DIR__ .'/UpdateRecordingSettings.php',
+        'Panopto\RemoteRecorderManagement\UpdateRecordingSettingsResponse' => __DIR__ .'/UpdateRecordingSettingsResponse.php',
+        'Panopto\RemoteRecorderManagement\GetDefaultFolderForRecorder' => __DIR__ .'/GetDefaultFolderForRecorder.php',
+        'Panopto\RemoteRecorderManagement\GetDefaultFolderForRecorderResponse' => __DIR__ .'/GetDefaultFolderForRecorderResponse.php',
+        'Panopto\RemoteRecorderManagement\GetMachineSidForRecorder' => __DIR__ .'/GetMachineSidForRecorder.php',
+        'Panopto\RemoteRecorderManagement\GetMachineSidForRecorderResponse' => __DIR__ .'/GetMachineSidForRecorderResponse.php'
     );
     if (!empty($classes[$class])) {
         include $classes[$class];
-    };
+    }
 }
 
 spl_autoload_register('autoload_245e14180df06cf455e7e671ed387763');

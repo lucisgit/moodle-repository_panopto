@@ -6,7 +6,7 @@ class Folder extends FolderBase
 {
 
     /**
-     * @var string $ExternalId
+     * @var string|null $ExternalId
      */
     protected $ExternalId = null;
 
@@ -21,17 +21,17 @@ class Folder extends FolderBase
      */
     public function getExternalId()
     {
-      return $this->ExternalId;
+        return $this->ExternalId;
     }
 
     /**
      * @param string $ExternalId
-     * @return \Panopto\SessionManagement\Folder
+     * @return Folder
      */
-    public function setExternalId($ExternalId)
+    public function setExternalId($ExternalId): Folder
     {
-      $this->ExternalId = $ExternalId;
-      return $this;
+        $this->ExternalId = $ExternalId;
+        return $this;
     }
 
 }
