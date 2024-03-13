@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2024020900;
+$plugin->version = 2024031300;
 $plugin->requires = 2023042400;
 $plugin->component = 'repository_panopto';
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = '4.2+2024020900 (for Panopto 14.12+)';
+$plugin->release = '4.2+2024031300 (for Panopto 14.12+)';
