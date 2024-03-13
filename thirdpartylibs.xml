@@ -4,7 +4,7 @@
         <location>lib/panopto</location>
         <name>PHP Panopto API client and libraries</name>
         <license>GPL</license>
-        <version>v1.0.3+5.3.0.35915</version>
+        <version>v1.0.4+14.12.0.00020</version>
         <licenseversion>3.0+</licenseversion>
     </library>
 </libraries>

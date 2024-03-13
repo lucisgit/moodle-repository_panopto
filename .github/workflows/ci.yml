@@ -63,7 +63,8 @@ jobs:
         env:
           DB: ${{ matrix.database }}
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
-          IGNORE_PATHS: 'lib/panopto/lib'
+          IGNORE_PATHS: 'lib/panopto'
+          IGNORE_NAMES: 'panoptopicker.php'
           # Uncomment this to run Behat tests using the Moodle App.
           # MOODLE_APP: 'true'
 

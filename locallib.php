@@ -25,7 +25,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once(dirname(__FILE__)."/lib/panopto/lib/Client.php");
+require_once(dirname(__FILE__) . "/lib/panopto/lib/Client.php");
 
 /**
  * Panopto API interface class.
@@ -97,7 +97,7 @@ class repository_panopto_interface {
             $auth = $this->adminauth;
         }
         try {
-            $param = new \Panopto\SessionManagement\GetSessionsById($auth, array($sessionid));
+            $param = new \Panopto\SessionManagement\GetSessionsById($auth, [$sessionid]);
             $sessions = $this->smclient->GetSessionsById($param)->getGetSessionsByIdResult()->getSession();
         } catch (Exception $e) {
             return false;
@@ -127,10 +127,14 @@ class repository_panopto_interface {
      * @return stdClass Group object.
      */
     public function create_external_group($groupname) {
-        $param = new \Panopto\UserManagement\CreateExternalGroup($this->adminauth, $groupname,
-            get_config('panopto', 'instancename'), $groupname, array());
-        $group = $this->umclient->CreateExternalGroup($param)->getCreateExternalGroupResult();
-        return $group;
+        $param = new \Panopto\UserManagement\CreateExternalGroup(
+            $this->adminauth,
+            $groupname,
+            get_config('panopto', 'instancename'),
+            $groupname,
+            []
+        );
+        return $this->umclient->CreateExternalGroup($param)->getCreateExternalGroupResult();
     }
 
     /**
@@ -186,8 +190,12 @@ class repository_panopto_interface {
      * @return void.
      */
     public function add_member_to_external_group($externalgroupid, $userid) {
-        $param = new \Panopto\UserManagement\AddMembersToExternalGroup($this->adminauth,
-            get_config('panopto', 'instancename'), $externalgroupid, array($userid));
+        $param = new \Panopto\UserManagement\AddMembersToExternalGroup(
+            $this->adminauth,
+            get_config('panopto', 'instancename'),
+            $externalgroupid,
+            [$userid]
+        );
         $this->umclient->AddMembersToExternalGroup($param);
     }
 
@@ -199,8 +207,12 @@ class repository_panopto_interface {
      * @return void.
      */
     public function remove_members_from_external_group($externalgroupid, $userids) {
-        $param = new \Panopto\UserManagement\RemoveMembersFromExternalGroup($this->adminauth,
-            get_config('panopto', 'instancename'), $externalgroupid, $userids);
+        $param = new \Panopto\UserManagement\RemoveMembersFromExternalGroup(
+            $this->adminauth,
+            get_config('panopto', 'instancename'),
+            $externalgroupid,
+            $userids
+        );
         $this->umclient->RemoveMembersFromExternalGroup($param);
     }
 
@@ -214,19 +226,33 @@ class repository_panopto_interface {
     public function sync_current_user() {
         global $USER;
         // Check that external user exists, if not, sync user data.
-        $getuserbykeyparams = new \Panopto\UserManagement\GetUserByKey($this->panoptoclient->getAuthenticationInfo(),
-            get_config('panopto', 'instancename') . '\\' . $USER->username);
+        $getuserbykeyparams = new \Panopto\UserManagement\GetUserByKey(
+            $this->panoptoclient->getAuthenticationInfo(),
+            get_config('panopto', 'instancename') . '\\' . $USER->username
+        );
         $user = $this->umclient->GetUserByKey($getuserbykeyparams)->getGetUserByKeyResult();
         if ($user === null) {
             // User does not exist, sync one.
-            $params = new \Panopto\UserManagement\SyncExternalUser($this->panoptoclient->getAuthenticationInfo(),
-                $USER->firstname, $USER->lastname, $USER->email, false, array());
+            $params = new \Panopto\UserManagement\SyncExternalUser(
+                $this->panoptoclient->getAuthenticationInfo(),
+                $USER->firstname,
+                $USER->lastname,
+                $USER->email,
+                false,
+                []
+            );
             $this->umclient->SyncExternalUser($params);
             $user = $this->umclient->GetUserByKey($getuserbykeyparams)->getGetUserByKeyResult();
         } else if (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
             // User exists, but some data is missing, update contact info.
-            $params = new \Panopto\UserManagement\UpdateContactInfo($this->panoptoclient->getAuthenticationInfo(),
-                $user->getUserId(), $USER->firstname, $USER->lastname, $USER->email, false);
+            $params = new \Panopto\UserManagement\UpdateContactInfo(
+                $this->panoptoclient->getAuthenticationInfo(),
+                $user->getUserId(),
+                $USER->firstname,
+                $USER->lastname,
+                $USER->email,
+                false
+            );
             $this->umclient->UpdateContactInfo($params);
         }
         return $user;

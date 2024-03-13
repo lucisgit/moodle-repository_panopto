@@ -42,14 +42,14 @@ require_once($CFG->dirroot . "/repository/panopto/locallib.php");
 class repository_panopto_external extends external_api {
     /**
      * Describes the parameters for get_session_by_id
-     * @return external_external_function_parameters
+     * @return external_function_parameters
      */
     public static function get_session_by_id_parameters() {
         return new external_function_parameters(
-            array(
+            [
                 'sessionid' => new external_value(PARAM_TEXT, 'session id'),
-                'contextid' => new external_value(PARAM_INT, 'context id')
-            )
+                'contextid' => new external_value(PARAM_INT, 'context id'),
+            ]
         );
     }
 
@@ -62,7 +62,7 @@ class repository_panopto_external extends external_api {
     public static function get_session_by_id($sessionid, $contextid) {
         global $USER;
         $params = self::validate_parameters(self::get_session_by_id_parameters(),
-                array('sessionid' => $sessionid, 'contextid' => $contextid));
+                ['sessionid' => $sessionid, 'contextid' => $contextid]);
 
         // Security checks.
         $context = self::get_context_from_params($params);
@@ -71,13 +71,13 @@ class repository_panopto_external extends external_api {
 
         // Instantiate Panopto client.
         $panoptoclient = new repository_panopto_interface();
-        $panoptoclient->set_authentication_info(
-                get_config('panopto', 'instancename') . '\\' . $USER->username, '', get_config('panopto', 'applicationkey'));
+        $panoptoclient->set_authentication_info(get_config('panopto', 'instancename') . '\\' . $USER->username, '',
+                get_config('panopto', 'applicationkey'));
 
         // Perform the call to Panopto API.
-        $sessions = array();
-        $result = array();
-        $sessiondata = array('canaccess' => true);
+        $sessions = [];
+        $result = [];
+        $sessiondata = ['canaccess' => true];
         $session = $panoptoclient->get_session_by_id($params['sessionid']);
 
         if (!$session) {
@@ -113,9 +113,9 @@ class repository_panopto_external extends external_api {
      */
     public static function get_session_by_id_returns() {
         return new external_single_structure(
-            array(
+            [
                 'session' => new external_single_structure(
-                    array(
+                    [
                         'id' => new external_value(PARAM_TEXT, 'session id'),
                         'name' => new external_value(PARAM_TEXT, 'session name'),
                         'created' => new external_value(PARAM_TEXT, 'session created timestamp'),
@@ -123,8 +123,9 @@ class repository_panopto_external extends external_api {
                         'viewerurl' => new external_value(PARAM_TEXT, 'session viewer url'),
                         'thumburl' => new external_value(PARAM_URL, 'session thumb url'),
                         'canaccess' => new external_value(PARAM_BOOL, 'session access flag'),
-                    ), 'session data', VALUE_OPTIONAL),
-            )
+                    ], 'session data', VALUE_OPTIONAL
+                ),
+            ]
         );
     }
 }

@@ -25,15 +25,15 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$capabilities = array(
-    'repository/panopto:view' => array(
+$capabilities = [
+    'repository/panopto:view' => [
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
-        'archetypes' => array(
+        'archetypes' => [
             'coursecreator' => CAP_ALLOW,
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        )
-    )
-);
+            'manager' => CAP_ALLOW,
+        ],
+    ],
+];

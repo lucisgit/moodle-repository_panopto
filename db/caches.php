@@ -25,8 +25,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$definitions = array(
-    'folderstree' => array(
+$definitions = [
+    'folderstree' => [
         'mode' => cache_store::MODE_SESSION,
-    )
-);
+    ],
+];

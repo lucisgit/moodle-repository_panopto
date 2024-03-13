@@ -58,7 +58,7 @@ class repository_panopto extends repository {
      * @param int|stdClass $context a context id or context object.
      * @param array $options repository options.
      */
-    public function __construct($repositoryid, $context = SYSCONTEXTID, $options = array()) {
+    public function __construct($repositoryid, $context = SYSCONTEXTID, $options = []) {
         global $USER;
         parent::__construct($repositoryid, $context, $options);
 
@@ -78,7 +78,7 @@ class repository_panopto extends repository {
             $this->smclient = $panoptoclient->SessionManagement();
             $this->umclient = $panoptoclient->UserManagement();
         } catch (Exception $e) {
-            // TODO: Flag this somehow, most likely there is settings issue or server is not available.
+            debugging("Caught exception initialising Panopto API client: " . $e->getMessage());
         }
     }
 
@@ -94,8 +94,8 @@ class repository_panopto extends repository {
         if (empty($path)) {
             $path = self::ROOT_FOLDER_ID;
         }
-        $navpath = array();
-        $listfolders = array();
+        $navpath = [];
+        $listfolders = [];
 
         // Split the path requested.
         $patharray = explode('/', $path);
@@ -105,15 +105,15 @@ class repository_panopto extends repository {
             if ($pathitem === self::ROOT_FOLDER_ID) {
                 // Root dir.
                 $navpathitem = $pathitem;
-                $navpath[] = array('name' => get_string('pluginname', 'repository_panopto'), 'path' => $navpathitem);
+                $navpath[] = ['name' => get_string('pluginname', 'repository_panopto'), 'path' => $navpathitem];
             } else {
                 // Getting deeper in subdirs...
                 // Add navigation path item.
-                $param = new \Panopto\SessionManagement\GetFoldersById($this->auth, array($pathitem));
+                $param = new \Panopto\SessionManagement\GetFoldersById($this->auth, [$pathitem]);
                 $folders = $this->smclient->GetFoldersById($param)->getGetFoldersByIdResult();
                 // Add navigation path item.
                 $navpathitem = $navpathitem . '/' . $pathitem;
-                $navpath[] = array('name' => $folders[0]->getName(), 'path' => $navpathitem);
+                $navpath[] = ['name' => $folders[0]->getName(), 'path' => $navpathitem];
             }
         }
 
@@ -133,7 +133,7 @@ class repository_panopto extends repository {
             if ($listrootfolders === false) {
                 // Process folders and replace missing parent folders with root.
                 $listfolders = $this->get_folders_list($path);
-                $listrootfolders = array();
+                $listrootfolders = [];
                 foreach ($listfolders as $folder) {
                     if ($folder['parentfolderid'] == self::ROOT_FOLDER_ID || !isset($listfolders[$folder['parentfolderid']])) {
                         // Missing parent folder, set to root.
@@ -143,7 +143,7 @@ class repository_panopto extends repository {
 
                 // Process sessions and move those with missing parent folder to root.
                 $listsessions = $this->get_sessions_list($path);
-                $listrootsessions = array();
+                $listrootsessions = [];
                 foreach ($listsessions as $parentfolderid => $sessionsarray) {
                     if ($parentfolderid == self::ROOT_FOLDER_ID || !isset($listfolders[$parentfolderid])) {
                         // Missing parent folder.
@@ -156,7 +156,7 @@ class repository_panopto extends repository {
 
                 // Store result in cache.
                 if (count($listrootfolders)) {
-                    $cache->set_many(array('listrootfolders' => $listrootfolders, 'lastupdated' => time()));
+                    $cache->set_many(['listrootfolders' => $listrootfolders, 'lastupdated' => time()]);
                 }
             }
             $listfolders = $listrootfolders;
@@ -210,7 +210,7 @@ class repository_panopto extends repository {
      */
     private function get_folders_list($path, $search = '') {
         global $OUTPUT;
-        $list = array();
+        $list = [];
 
         // Build the GetFoldersList request and perform the call.
         $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
@@ -245,15 +245,15 @@ class repository_panopto extends repository {
                 if (empty($parentfolderid)) {
                     $parentfolderid = self::ROOT_FOLDER_ID;
                 }
-                $list[$folder->getId()] = array(
+                $list[$folder->getId()] = [
                     'title' => $folder->getName(),
                     'shorttitle' => $folder->getName(),
                     'path' => $path . '/' . $folder->getId(),
                     'thumbnail' => $OUTPUT->image_url('f/folder-32')->out(false),
-                    'children' => array(),
+                    'children' => [],
                     // Techical data we need to build directory tree.
                     'parentfolderid' => $parentfolderid,
-                );
+                ];
             }
         }
         return $list;
@@ -270,7 +270,7 @@ class repository_panopto extends repository {
      * @return array list of files with the same layout as the 'list' element in 'get_listing'.
      */
     private function get_sessions_list($path, $search = '') {
-        $list = array();
+        $list = [];
 
         // Build the GetFoldersList request and perform the call.
         $pagination = new \Panopto\RemoteRecorderManagement\Pagination();
@@ -281,7 +281,7 @@ class repository_panopto extends repository {
         $request->setPagination($pagination);
         $request->setSortBy('Name');
         $request->setSortIncreasing(true);
-        $request->setStates(array('Complete'));
+        $request->setStates(['Complete']);
 
         // If we are not searching, set parent folder if required.
         $orphanedlistingcheck = get_config('panopto', 'showorphanedsessions') ? ($path !== self::ROOT_FOLDER_ID) : true;
@@ -290,7 +290,7 @@ class repository_panopto extends repository {
             $currentfolderid = end($patharray);
             $request->setFolderId($currentfolderid);
             // Pre-define array for the current parent folder.
-            $list[$currentfolderid] = array();
+            $list[$currentfolderid] = [];
         }
 
         $param = new \Panopto\SessionManagement\GetSessionsList($this->auth, $request, $search);
@@ -306,7 +306,7 @@ class repository_panopto extends repository {
                     $parentfolderid = self::ROOT_FOLDER_ID;
                 }
                 if (!isset($list[$parentfolderid])) {
-                    $list[$parentfolderid] = array();
+                    $list[$parentfolderid] = [];
                 }
                 // Add session data.
                 $title = $session->getName();
@@ -316,7 +316,7 @@ class repository_panopto extends repository {
                     $thumburl = new moodle_url('https:' . $thumbnail);
                     $thumbnail = $thumburl->out(false);
                 }
-                $list[$parentfolderid][] = array(
+                $list[$parentfolderid][] = [
                     'shorttitle' => $title,
                     'title' => $title,
                     'source' => $session->getId(),
@@ -324,7 +324,7 @@ class repository_panopto extends repository {
                     'thumbnail' => $thumbnail,
                     'thumbnail_title' => $session->getDescription(),
                     'date' => $session->getStartTime()->format('U'),
-                );
+                ];
             }
         }
         return $list;
@@ -336,12 +336,17 @@ class repository_panopto extends repository {
      * @return array of listing properties.
      */
     private function get_base_listing() {
-        return array(
+        return [
             'dynload' => true,
             'nologin' => true,
-            'path' => array(array('name' => get_string('pluginname', 'repository_panopto'), 'path' => self::ROOT_FOLDER_ID)),
-            'list' => array(),
-        );
+            'path' => [
+                [
+                    'name' => get_string('pluginname', 'repository_panopto'),
+                    'path' => self::ROOT_FOLDER_ID,
+                ],
+            ],
+            'list' => [],
+        ];
     }
 
     /**
@@ -350,7 +355,7 @@ class repository_panopto extends repository {
      * @return array of option names.
      */
     public static function get_type_option_names() {
-        return array(
+        return [
             'serverhostname',
             'userkey',
             'password',
@@ -359,7 +364,7 @@ class repository_panopto extends repository {
             'pluginname',
             'folderstreecachettl',
             'showorphanedsessions',
-        );
+        ];
     }
 
     /**
@@ -373,7 +378,7 @@ class repository_panopto extends repository {
 
         // Notice about repo availability.
         $mform->addElement('static', 'pluginnotice', '',
-            html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), array('class' => 'warning')));
+                html_writer::tag('div', get_string('pluginnotice', 'repository_panopto'), ['class' => 'warning']));
         $strrequired = get_string('required');
         parent::type_config_form($mform);
 
@@ -424,9 +429,9 @@ class repository_panopto extends repository {
 
         // Display Bounce Page URL for Identity Privder setup.
         $sql = 'SELECT i.id FROM {repository} r, {repository_instances} i WHERE r.type=? AND i.typeid=r.id';
-        $repoid = $DB->get_field_sql($sql, array('panopto'));
+        $repoid = $DB->get_field_sql($sql, ['panopto']);
         if ($repoid) {
-            $url = new \moodle_url('/repository/repository_callback.php', array('repo_id' => $repoid));
+            $url = new \moodle_url('/repository/repository_callback.php', ['repo_id' => $repoid]);
             $mform->addElement('static', 'bouncepageurl', get_string('bouncepageurl', 'repository_panopto'),
                 get_string('bouncepageurldesc', 'repository_panopto', $url->out(true)));
         } else {
@@ -488,7 +493,7 @@ class repository_panopto extends repository {
         if ($user === null) {
             // User does not exist, sync one.
             $params = new \Panopto\UserManagement\SyncExternalUser($this->auth, $USER->firstname,
-                $USER->lastname, $USER->email, false, array());
+                $USER->lastname, $USER->email, false, []);
             $this->umclient->SyncExternalUser($params);
         } else if (!$user->getFirstName() || !$user->getLastName() || !$user->getEmail()) {
             // User exists, but some data is missing, update contact info.
@@ -530,12 +535,12 @@ class repository_panopto extends repository {
         $responseparams = $responseparams . "|" . get_config('panopto', 'applicationkey');
         $responseauthcode = strtoupper(sha1($responseparams));
 
-        $urlparams = array(
+        $urlparams = [
             'serverName' => $servername,
             'externalUserKey' => $userkey,
             'expiration' => $expiration,
             'authCode' => $responseauthcode,
-        );
+        ];
         $redirecturl = new \moodle_url($callbackurl, $urlparams);
 
         // Redirect to Panopto.

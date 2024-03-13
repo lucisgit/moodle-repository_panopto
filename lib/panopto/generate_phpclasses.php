@@ -2,19 +2,18 @@
 
 /*
  * Panopto PHP classes generator.
- * 
+ *
  * This script is using WSDL to PHP classes converter tool
  * (https://github.com/wsdl2phpgenerator/wsdl2phpgenerator) to
  * generate PHP classess for Panopto API web services use.
  */
 
-
 if (isset($_SERVER['REMOTE_ADDR'])) {
-    die; // no access from web!
+    die; // No access from web!
 }
 
-if (file_exists(__DIR__.'/vendor/autoload.php')) {
-    require_once(__DIR__.'/vendor/autoload.php');
+if (file_exists(__DIR__ . '/vendor/autoload.php')) {
+    require_once(__DIR__ . '/vendor/autoload.php');
     $generator = new \Wsdl2PhpGenerator\Generator();
 } else {
     echo "Composer dependencies seem missing, run 'php composer.phar install' in the current directory.\n";
@@ -26,7 +25,7 @@ $server = 'demo.hosted.panopto.com';
 $version = '4.6';
 
 // CLI options.
-$options = getopt("h", array('host:', 'apiversion:', 'help'));
+$options = getopt("h", ['host:', 'apiversion:', 'help']);
 
 // Checking util.php CLI script usage.
 $help = <<<HELP
@@ -66,30 +65,30 @@ if (!empty($options['apiversion'])) {
 }
 
 // Generate classes.
-$destination = __DIR__.'/lib/Panopto/PublicAPI/' . $version;
+$destination = __DIR__ . '/lib/Panopto/PublicAPI/' . $version;
 
-$webservices = array(
+$webservices = [
     'AccessManagement',
     'Auth',
     'RemoteRecorderManagement',
     'SessionManagement',
     'UsageReporting',
     'UserManagement',
-);
+];
 
 echo 'Using https://' . $server . '/Panopto/PublicAPI/' . $version . "/ for webservices interface.\n";
 
 foreach ($webservices as $webservice) {
     echo "Generating \Panopto\\" . $webservice . " classes...\n";
-    $generatorconfig = array(
+    $generatorconfig = [
         'inputFile' => 'https://' . $server . '/Panopto/PublicAPI/' . $version . '/' . $webservice . '.svc?wsdl',
         'outputDir' => $destination . '/' . $webservice,
         'namespaceName' => 'Panopto\\' . $webservice,
-    );
+    ];
 
     $generator->generate(new \Wsdl2PhpGenerator\Config($generatorconfig));
 }
 
-echo "\nPHP classess have been generated from Panopto API WSDL. Use " . $destination . "/<webservice>/autoload.php in your project.\n";
+echo "\nPHP classess have been generated from Panopto API WSDL. Use " . $destination .
+        "/<webservice>/autoload.php in your project.\n";
 exit(0);
-
