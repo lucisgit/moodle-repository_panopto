@@ -109,12 +109,12 @@ class MoodleQuickForm_panoptopicker extends HTML_QuickForm_input {
         $fp = new file_picker($args);
 
         // Override repositories list and make Panopto repository the only listed.
-        $fp->options->repositories = array();
-        $repositories = repository::get_instances(array(
+        $fp->options->repositories = [];
+        $repositories = repository::get_instances([
             'currentcontext' => $PAGE->context,
             'type' => 'panopto',
             'onlyvisible' => false,
-        ));
+        ]);
         foreach ($repositories as $repository) {
             $meta = $repository->get_meta();
             $fp->options->repositories[$repository->id] = $meta;
@@ -141,18 +141,18 @@ EOD;
         // will get into amd in the core first. Passing $options to amd seems
         // problematic as it contains objects.
         $options->element_id = $this->getAttribute('id');
-        $module = array('name' => 'form_panoptopicker',
+        $module = ['name' => 'form_panoptopicker',
             'fullpath' => '/repository/panopto/form/panoptopicker.js',
-            'requires' => array('core_filepicker')
-        );
-        $PAGE->requires->js_init_call('M.form_panoptopicker.init', array($options), true, $module);
+            'requires' => ['core_filepicker'],
+        ];
+        $PAGE->requires->js_init_call('M.form_panoptopicker.init', [$options], true, $module);
 
         // Initialise JS amd that performs AJAX calls to retrieve session data using Panopto API on backend.
-        $params = array(
+        $params = [
             'elementid' => $options->element_id,
             'contextid' => $PAGE->context->id,
-        );
-        $PAGE->requires->js_call_amd('repository_panopto/panoptopicker', 'init', array($params));
+        ];
+        $PAGE->requires->js_call_amd('repository_panopto/panoptopicker', 'init', [$params]);
 
         return $str;
     }
