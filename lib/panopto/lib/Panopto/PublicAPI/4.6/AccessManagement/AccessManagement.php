@@ -77,7 +77,7 @@ class AccessManagement extends \SoapClient
       'features' => 1,
     ), $options);
       if (!$wsdl) {
-        $wsdl = 'https://demo.hosted.panopto.com/Panopto/PublicAPI/4.6/AccessManagement.svc?wsdl';
+        $wsdl = 'https://demo.hosted.panopto.com/Panopto/PublicAPI/4.6/AccessManagement.svc?singlewsdl';
       }
       parent::__construct($wsdl, $options);
     }

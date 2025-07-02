@@ -81,7 +81,7 @@ echo 'Using https://' . $server . '/Panopto/PublicAPI/' . $version . "/ for webs
 foreach ($webservices as $webservice) {
     echo "Generating \Panopto\\" . $webservice . " classes...\n";
     $generatorconfig = [
-        'inputFile' => 'https://' . $server . '/Panopto/PublicAPI/' . $version . '/' . $webservice . '.svc?wsdl',
+        'inputFile' => 'https://' . $server . '/Panopto/PublicAPI/' . $version . '/' . $webservice . '.svc?singlewsdl',
         'outputDir' => $destination . '/' . $webservice,
         'namespaceName' => 'Panopto\\' . $webservice,
     ];

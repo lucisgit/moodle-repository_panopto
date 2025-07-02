@@ -93,7 +93,7 @@ class UserManagement extends \SoapClient
       'features' => 1,
     ), $options);
       if (!$wsdl) {
-        $wsdl = 'https://demo.hosted.panopto.com/Panopto/PublicAPI/4.6/UserManagement.svc?wsdl';
+        $wsdl = 'https://demo.hosted.panopto.com/Panopto/PublicAPI/4.6/UserManagement.svc?singlewsdl';
       }
       parent::__construct($wsdl, $options);
     }
